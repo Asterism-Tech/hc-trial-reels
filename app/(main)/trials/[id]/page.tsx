@@ -1,0 +1,55 @@
+'use client'
+
+export const dynamic = 'force-dynamic'
+
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { fetchTrialGroup } from '@/lib/data'
+import { TrialGroup } from '@/lib/types'
+import TrialGroupCard from '@/components/trials/TrialGroupCard'
+import SkeletonCard from '@/components/ui/SkeletonCard'
+import EmptyState from '@/components/ui/EmptyState'
+
+export default function TrialDetailPage() {
+  const { id } = useParams<{ id: string }>()
+  const [group, setGroup] = useState<TrialGroup | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const load = async () => {
+      const data = await fetchTrialGroup(supabase, id)
+      setGroup(data)
+      setLoading(false)
+    }
+    load()
+  }, [id])
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <Link href="/trials" className="text-[#555] hover:text-white transition-colors">
+          <ArrowLeft size={18} />
+        </Link>
+        <div>
+          <h1 className="text-xl font-bold text-white">{group?.name ?? 'Trial Group'}</h1>
+          <p className="text-[#666] text-xs mt-0.5">Trial Reel detail view</p>
+        </div>
+      </div>
+
+      {loading ? (
+        <SkeletonCard lines={8} />
+      ) : group ? (
+        <TrialGroupCard
+          group={group}
+          onUpdate={(updated) => setGroup(updated)}
+          defaultExpanded
+        />
+      ) : (
+        <EmptyState title="Trial group not found" description="This trial may have been deleted." />
+      )}
+    </div>
+  )
+}
