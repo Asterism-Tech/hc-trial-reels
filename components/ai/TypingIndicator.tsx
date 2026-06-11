@@ -4,9 +4,9 @@ export default function TypingIndicator() {
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="w-1.5 h-1.5 rounded-full bg-[#6B2D8B]"
+          className="w-1.5 h-1.5 rounded-full bg-[#45132c]"
           style={{
-            animation: 'pulse3dot 1.4s ease-in-out infinite',
+            animation: 'stitch 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite',
             animationDelay: `${i * 0.2}s`,
           }}
         />

@@ -8,7 +8,7 @@ import crypto from 'crypto'
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(5, '1 h'),
+  limiter: Ratelimit.slidingWindow(20, '1 h'),
 })
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })

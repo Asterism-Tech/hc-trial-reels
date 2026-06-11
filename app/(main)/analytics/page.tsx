@@ -28,10 +28,10 @@ const DATE_RANGES = [
 
 function SectionCard({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5 animate-fadeIn">
+    <div className="bg-white border border-[#e8d5c4] rounded-xl p-5 animate-fadeIn shadow-[0_2px_8px_rgba(69,19,44,0.06)]">
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-white">{title}</h3>
-        <p className="text-xs text-[#555] mt-0.5">{subtitle}</p>
+        <h3 className="text-sm font-semibold text-[#45132c]">{title}</h3>
+        <p className="text-xs text-[#a07080] mt-0.5">{subtitle}</p>
       </div>
       {children}
     </div>
@@ -80,21 +80,23 @@ export default function AnalyticsPage() {
     return result
   }, [groups, platform, theme, dateRange, tagFilter])
 
+  const selectClass = "bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-2.5 py-1.5 text-xs text-[#45132c] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Analytics</h1>
-        <p className="text-[#666] text-sm mt-1">Performance insights across all trial reels</p>
+        <h1 className="text-2xl font-bold text-[#45132c]">Analytics</h1>
+        <p className="text-[#8a5a70] text-sm mt-1">Performance insights across all trial reels</p>
       </div>
 
       {/* Filter bar */}
-      <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 flex flex-wrap gap-3">
+      <div className="bg-white border border-[#e8d5c4] rounded-xl p-4 flex flex-wrap gap-3 shadow-[0_2px_8px_rgba(69,19,44,0.04)]">
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] text-[#555] uppercase">Platform</label>
+          <label className="text-[10px] text-[#a07080] uppercase tracking-wider">Platform</label>
           <select
             value={platform}
             onChange={(e) => setPlatform(e.target.value)}
-            className="bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#6B2D8B]"
+            className={selectClass}
           >
             {['All', 'Instagram', 'TikTok', 'Facebook'].map((p) => (
               <option key={p} value={p}>{p}</option>
@@ -103,11 +105,11 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] text-[#555] uppercase">Theme</label>
+          <label className="text-[10px] text-[#a07080] uppercase tracking-wider">Theme</label>
           <select
             value={theme}
             onChange={(e) => setTheme(e.target.value)}
-            className="bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#6B2D8B]"
+            className={selectClass}
           >
             {['All', ...CONTENT_THEMES].map((t) => (
               <option key={t} value={t}>{t}</option>
@@ -116,11 +118,11 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] text-[#555] uppercase">Date Range</label>
+          <label className="text-[10px] text-[#a07080] uppercase tracking-wider">Date Range</label>
           <select
             value={dateRange}
             onChange={(e) => setDateRange(parseInt(e.target.value))}
-            className="bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#6B2D8B]"
+            className={selectClass}
           >
             {DATE_RANGES.map((d) => (
               <option key={d.days} value={d.days}>{d.label}</option>
@@ -129,11 +131,11 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] text-[#555] uppercase">Tag</label>
+          <label className="text-[10px] text-[#a07080] uppercase tracking-wider">Tag</label>
           <select
             value={tagFilter}
             onChange={(e) => setTagFilter(e.target.value)}
-            className="bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#6B2D8B]"
+            className={selectClass}
           >
             {allTags.map((t) => (
               <option key={t} value={t}>{t}</option>
@@ -142,7 +144,7 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="flex items-end">
-          <span className="text-xs text-[#555] pb-1.5">
+          <span className="text-xs text-[#a07080] pb-1.5">
             {filtered.length} trial{filtered.length !== 1 ? 's' : ''} shown
           </span>
         </div>

@@ -28,19 +28,19 @@ export default function StatBar({ versions, stat, label, unit = '' }: StatBarPro
 
   return (
     <div>
-      <p className="text-xs text-[#888] mb-1">{label}</p>
+      <p className="text-xs text-[#8a5a70] mb-1">{label}</p>
       <ResponsiveContainer width="100%" height={60}>
         <BarChart data={data} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
-          <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#666' }} axisLine={false} tickLine={false} />
+          <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#8a5a70' }} axisLine={false} tickLine={false} />
           <YAxis hide />
           <Tooltip
-            contentStyle={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 8, fontSize: 11 }}
+            contentStyle={{ background: '#ffffff', border: '1px solid #e8d5c4', borderRadius: 8, fontSize: 11, color: '#45132c' }}
             formatter={(val: unknown) => [`${formatNumber(Number(val))}${unit}`, label]}
-            cursor={{ fill: '#2A2A2A' }}
+            cursor={{ fill: '#f0e6d3' }}
           />
           <Bar dataKey="value" radius={[3, 3, 0, 0]}>
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.isWinner ? '#F5B942' : '#6B2D8B'} />
+              <Cell key={`cell-${index}`} fill={entry.isWinner ? '#F5B942' : '#45132c'} />
             ))}
           </Bar>
         </BarChart>

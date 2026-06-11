@@ -8,15 +8,15 @@ interface BadgeProps {
 }
 
 const variantClasses: Record<string, string> = {
-  purple: 'bg-[#6B2D8B]/20 text-[#A855D4] border border-[#6B2D8B]/30',
-  gold: 'bg-[#F5B942]/20 text-[#F5B942] border border-[#F5B942]/30',
-  grey: 'bg-[#2A2A2A] text-[#888] border border-[#3A3A3A]',
-  green: 'bg-[#22C55E]/20 text-[#22C55E] border border-[#22C55E]/30',
-  blue: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-  orange: 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
-  pink: 'bg-pink-500/20 text-pink-400 border border-pink-500/30',
-  teal: 'bg-teal-500/20 text-teal-400 border border-teal-500/30',
-  yellow: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
+  purple: 'bg-[#45132c]/10 text-[#45132c] border border-[#45132c]/20',
+  gold: 'bg-[#F5B942]/20 text-[#b87d00] border border-[#F5B942]/40',
+  grey: 'bg-[#f0e6d3] text-[#8a5a70] border border-[#e8d5c4]',
+  green: 'bg-green-50 text-green-700 border border-green-200',
+  blue: 'bg-blue-50 text-blue-700 border border-blue-200',
+  orange: 'bg-orange-50 text-orange-700 border border-orange-200',
+  pink: 'bg-[#ed4a7e]/10 text-[#c02860] border border-[#ed4a7e]/30',
+  teal: 'bg-teal-50 text-teal-700 border border-teal-200',
+  yellow: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
 }
 
 const statusVariantMap: Record<TrialStatus, string> = {

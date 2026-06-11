@@ -14,11 +14,11 @@ interface TagRow {
 }
 
 function getColor(val: number, min: number, max: number): string {
-  if (max === min) return 'text-[#888]'
+  if (max === min) return 'text-[#8a5a70]'
   const pct = (val - min) / (max - min)
   if (pct > 0.66) return 'text-[#22C55E]'
   if (pct > 0.33) return 'text-[#F5B942]'
-  return 'text-red-400'
+  return 'text-red-500'
 }
 
 export default function TagPerformanceMatrix({ groups }: Props) {
@@ -48,7 +48,7 @@ export default function TagPerformanceMatrix({ groups }: Props) {
   })).sort((a, b) => b.winRate - a.winRate)
 
   if (rows.length === 0) return (
-    <div className="flex items-center justify-center h-32 text-[#555] text-sm">No tagged trials yet</div>
+    <div className="flex items-center justify-center h-32 text-[#a07080] text-sm">No tagged trials yet</div>
   )
 
   const allViews = rows.map((r) => r.avgViews)
@@ -62,18 +62,18 @@ export default function TagPerformanceMatrix({ groups }: Props) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[#2A2A2A]">
-            <th className="text-left text-xs text-[#555] font-medium py-2 pr-4">Tag</th>
-            <th className="text-right text-xs text-[#555] font-medium py-2 px-3">Avg Views</th>
-            <th className="text-right text-xs text-[#555] font-medium py-2 px-3">Avg Completion</th>
-            <th className="text-right text-xs text-[#555] font-medium py-2 px-3">Win Rate</th>
-            <th className="text-right text-xs text-[#555] font-medium py-2 pl-3">Trials</th>
+          <tr className="border-b border-[#e8d5c4]">
+            <th className="text-left text-xs text-[#a07080] font-medium py-2 pr-4">Tag</th>
+            <th className="text-right text-xs text-[#a07080] font-medium py-2 px-3">Avg Views</th>
+            <th className="text-right text-xs text-[#a07080] font-medium py-2 px-3">Avg Completion</th>
+            <th className="text-right text-xs text-[#a07080] font-medium py-2 px-3">Win Rate</th>
+            <th className="text-right text-xs text-[#a07080] font-medium py-2 pl-3">Trials</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.tag} className="border-b border-[#1A1A1A] hover:bg-[#1F1F1F]">
-              <td className="py-2 pr-4 text-xs text-[#ccc] font-medium">{row.tag}</td>
+            <tr key={row.tag} className="border-b border-[#f0e6d3] hover:bg-[#faf9f7]">
+              <td className="py-2 pr-4 text-xs text-[#5a2040] font-medium">{row.tag}</td>
               <td className={`py-2 px-3 text-xs text-right font-mono ${getColor(row.avgViews, minV, maxV)}`}>
                 {formatNumber(row.avgViews)}
               </td>
@@ -83,7 +83,7 @@ export default function TagPerformanceMatrix({ groups }: Props) {
               <td className={`py-2 px-3 text-xs text-right font-mono ${getColor(row.winRate, minW, maxW)}`}>
                 {row.winRate}%
               </td>
-              <td className="py-2 pl-3 text-xs text-right text-[#666]">{row.count}</td>
+              <td className="py-2 pl-3 text-xs text-right text-[#8a5a70]">{row.count}</td>
             </tr>
           ))}
         </tbody>

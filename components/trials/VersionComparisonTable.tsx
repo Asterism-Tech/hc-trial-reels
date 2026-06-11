@@ -57,11 +57,11 @@ export default function VersionComparisonTable({ versions }: VersionComparisonTa
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[#2A2A2A]">
-            <th className="text-left text-xs text-[#555] font-medium py-2 pr-4 w-36">Field</th>
+          <tr className="border-b border-[#e8d5c4]">
+            <th className="text-left text-xs text-[#a07080] font-medium py-2 pr-4 w-36">Field</th>
             {versions.map((v) => (
               <th key={v.id} className="text-left text-xs font-medium py-2 px-2 min-w-[140px]">
-                <span className={`${v.isWinner ? 'text-[#F5B942]' : 'text-[#999]'}`}>
+                <span className={`${v.isWinner ? 'text-[#b87d00]' : 'text-[#8a5a70]'}`}>
                   V{v.versionNumber} {v.isWinner ? '👑' : ''}
                 </span>
               </th>
@@ -74,14 +74,14 @@ export default function VersionComparisonTable({ versions }: VersionComparisonTa
             return (
               <tr
                 key={row.key}
-                className={`border-b border-[#1A1A1A] ${differs ? 'bg-amber-500/5' : ''}`}
+                className={`border-b border-[#f0e6d3] ${differs ? 'bg-amber-50' : ''}`}
               >
-                <td className={`py-1.5 pr-4 text-xs ${differs ? 'text-amber-400' : 'text-[#666]'} font-medium`}>
+                <td className={`py-1.5 pr-4 text-xs ${differs ? 'text-amber-700' : 'text-[#8a5a70]'} font-medium`}>
                   {row.label}
-                  {differs && <span className="ml-1 text-[10px] text-amber-500">●</span>}
+                  {differs && <span className="ml-1 text-[10px] text-amber-600">●</span>}
                 </td>
                 {versions.map((v) => (
-                  <td key={v.id} className="py-1.5 px-2 text-xs text-[#ccc] max-w-[200px] truncate">
+                  <td key={v.id} className="py-1.5 px-2 text-xs text-[#5a2040] max-w-[200px] truncate">
                     {getCellValue(v, row)}
                   </td>
                 ))}

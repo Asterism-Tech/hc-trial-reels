@@ -24,13 +24,13 @@ function renderMarkdown(text: string) {
     if (line.startsWith('- ') || line.startsWith('• ')) {
       const content = line.replace(/^[-•]\s+/, '')
       return (
-        <li key={i} className="ml-4 list-disc text-[#ccc]">
+        <li key={i} className="ml-4 list-disc text-[#5a2040]">
           <BoldText text={content} />
         </li>
       )
     }
     return (
-      <p key={i} className={`text-[#ccc] ${line === '' ? 'mt-2' : ''}`}>
+      <p key={i} className={`text-[#5a2040] ${line === '' ? 'mt-2' : ''}`}>
         <BoldText text={line} />
       </p>
     )
@@ -43,7 +43,7 @@ function BoldText({ text }: { text: string }) {
     <>
       {parts.map((part, i) =>
         part.startsWith('**') && part.endsWith('**') ? (
-          <strong key={i} className="text-white font-semibold">{part.slice(2, -2)}</strong>
+          <strong key={i} className="text-[#45132c] font-semibold">{part.slice(2, -2)}</strong>
         ) : (
           <span key={i}>{part}</span>
         )
@@ -156,23 +156,23 @@ export default function ChatInterface({ groups }: ChatInterfaceProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden">
+    <div className="flex flex-col h-full bg-white border border-[#e8d5c4] rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(69,19,44,0.06)]">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-[#2A2A2A]">
-        <h3 className="text-sm font-semibold text-white">Chat with your data</h3>
-        <p className="text-xs text-[#555]">Ask anything about your trial reels</p>
+      <div className="px-4 py-3 border-b border-[#e8d5c4]">
+        <h3 className="text-sm font-semibold text-[#45132c]">Chat with your data</h3>
+        <p className="text-xs text-[#a07080]">Ask anything about your trial reels</p>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 bg-[#faf9f7]">
         {loadingHistory && (
-          <div className="text-center text-xs text-[#555] py-4">Loading history...</div>
+          <div className="text-center text-xs text-[#a07080] py-4">Loading history...</div>
         )}
 
         {!loadingHistory && messages.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-[#555] text-sm mb-2">No messages yet</p>
-            <p className="text-[#444] text-xs">Ask a question below to get started</p>
+            <p className="text-[#a07080] text-sm mb-2">No messages yet</p>
+            <p className="text-[#b09090] text-xs">Ask a question below to get started</p>
           </div>
         )}
 
@@ -184,8 +184,8 @@ export default function ChatInterface({ groups }: ChatInterfaceProps) {
             <div
               className={`max-w-[85%] rounded-xl px-3 py-2.5 text-xs ${
                 msg.role === 'user'
-                  ? 'bg-[#6B2D8B] text-white ml-8'
-                  : 'bg-[#0F0F0F] border border-[#2A2A2A] mr-8'
+                  ? 'bg-[#45132c] text-white ml-8'
+                  : 'bg-white border border-[#e8d5c4] mr-8 shadow-[0_1px_4px_rgba(69,19,44,0.06)]'
               }`}
             >
               {msg.role === 'assistant' && msg.content === '' ? (
@@ -204,13 +204,13 @@ export default function ChatInterface({ groups }: ChatInterfaceProps) {
 
       {/* Starter chips */}
       {messages.length === 0 && !loadingHistory && (
-        <div className="px-4 pb-2 flex flex-wrap gap-1.5">
+        <div className="px-4 pb-2 flex flex-wrap gap-1.5 bg-[#faf9f7]">
           {STARTER_PROMPTS.map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => sendMessage(p)}
-              className="text-xs px-2.5 py-1 bg-[#6B2D8B]/10 border border-[#6B2D8B]/30 text-[#A855D4] rounded-full hover:bg-[#6B2D8B]/20 transition-colors"
+              className="text-xs px-2.5 py-1 bg-[#45132c]/5 border border-[#45132c]/20 text-[#45132c] rounded-full hover:bg-[#45132c]/10 transition-colors"
             >
               {p}
             </button>
@@ -219,7 +219,7 @@ export default function ChatInterface({ groups }: ChatInterfaceProps) {
       )}
 
       {/* Input */}
-      <div className="p-3 border-t border-[#2A2A2A]">
+      <div className="p-3 border-t border-[#e8d5c4] bg-white">
         <div className="flex gap-2 items-end">
           <textarea
             ref={textareaRef}
@@ -229,19 +229,19 @@ export default function ChatInterface({ groups }: ChatInterfaceProps) {
             placeholder="Ask about your trial data..."
             rows={1}
             disabled={loading}
-            className="flex-1 bg-[#0F0F0F] border border-[#2A2A2A] rounded-xl px-3 py-2 text-sm text-white placeholder-[#444] focus:outline-none focus:border-[#6B2D8B] resize-none disabled:opacity-50"
+            className="flex-1 bg-[#faf9f7] border border-[#e8d5c4] rounded-xl px-3 py-2 text-sm text-[#45132c] placeholder-[#c0a0b0] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all resize-none disabled:opacity-50"
             style={{ maxHeight: 120, overflowY: 'auto' }}
           />
           <button
             type="button"
             onClick={() => sendMessage()}
             disabled={!input.trim() || loading}
-            className="w-9 h-9 flex items-center justify-center bg-[#6B2D8B] hover:bg-[#7B3D9B] rounded-xl text-white transition-colors disabled:opacity-40 shrink-0"
+            className="w-9 h-9 flex items-center justify-center bg-[#45132c] hover:bg-[#ed4a7e] rounded-xl text-white transition-all duration-200 disabled:opacity-40 shrink-0 hover:scale-105 hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
           >
             <Send size={14} />
           </button>
         </div>
-        <p className="text-[10px] text-[#444] mt-1.5">Enter to send · Shift+Enter for new line</p>
+        <p className="text-[10px] text-[#b09090] mt-1.5">Enter to send · Shift+Enter for new line</p>
       </div>
     </div>
   )

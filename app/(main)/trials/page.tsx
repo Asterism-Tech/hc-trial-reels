@@ -53,12 +53,12 @@ export default function TrialsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Trials</h1>
-          <p className="text-[#666] text-sm mt-1">Track and compare your A/B test Trial Reels</p>
+          <h1 className="text-2xl font-bold text-[#45132c]">Trials</h1>
+          <p className="text-[#8a5a70] text-sm mt-1">Track and compare your A/B test Trial Reels</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#6B2D8B] hover:bg-[#7B3D9B] text-white text-sm font-medium rounded-xl transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#45132c] hover:bg-[#ed4a7e] text-white text-sm font-semibold rounded-xl transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
         >
           <Plus size={16} />
           New Trial Group
@@ -66,22 +66,22 @@ export default function TrialsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-1 w-fit">
+      <div className="flex gap-1 bg-white border border-[#e8d5c4] rounded-xl p-1 w-fit shadow-[0_2px_8px_rgba(69,19,44,0.04)]">
         {TABS.map((tab) => {
           const count = tab.value === 'all' ? groups.length : groups.filter((g) => g.status === tab.value).length
           return (
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeTab === tab.value
-                  ? 'bg-[#6B2D8B] text-white'
-                  : 'text-[#666] hover:text-white'
+                  ? 'bg-[#45132c] text-white'
+                  : 'text-[#8a5a70] hover:text-[#45132c]'
               }`}
             >
               {tab.label}
               {count > 0 && (
-                <span className={`ml-1.5 text-xs ${activeTab === tab.value ? 'text-white/70' : 'text-[#444]'}`}>
+                <span className={`ml-1.5 text-xs ${activeTab === tab.value ? 'text-white/70' : 'text-[#b09090]'}`}>
                   {count}
                 </span>
               )}
@@ -103,7 +103,7 @@ export default function TrialsPage() {
             activeTab === 'all' || activeTab === 'live' ? (
               <button
                 onClick={() => setShowModal(true)}
-                className="px-4 py-2 bg-[#6B2D8B] text-white text-sm rounded-xl hover:bg-[#7B3D9B] transition-colors"
+                className="px-4 py-2 bg-[#45132c] text-white text-sm font-semibold rounded-xl hover:bg-[#ed4a7e] transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
               >
                 Add Trial Group
               </button>

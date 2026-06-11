@@ -71,11 +71,11 @@ export default function TagPicker({ selected, onChange, customTags = [] }: TagPi
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-left hover:border-[#6B2D8B] transition-colors"
+        className="w-full flex items-center justify-between bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-left hover:border-[#45132c] transition-colors duration-200"
       >
         <div className="flex flex-wrap gap-1.5 flex-1 min-h-[20px]">
           {selected.length === 0 ? (
-            <span className="text-[#555]">Select tags...</span>
+            <span className="text-[#b09090]">Select tags...</span>
           ) : (
             selected.map((tag) => {
               const tagDef = allTags.find((t) => t.name === tag)
@@ -84,8 +84,8 @@ export default function TagPicker({ selected, onChange, customTags = [] }: TagPi
                   key={tag}
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
                   style={{
-                    backgroundColor: tagDef ? tagDef.color + '33' : '#2A2A2A',
-                    color: tagDef ? tagDef.color : '#888',
+                    backgroundColor: tagDef ? tagDef.color + '22' : '#f0e6d3',
+                    color: tagDef ? tagDef.color : '#8a5a70',
                   }}
                 >
                   {tag}
@@ -104,14 +104,14 @@ export default function TagPicker({ selected, onChange, customTags = [] }: TagPi
             })
           )}
         </div>
-        <ChevronDown size={14} className={`text-[#555] shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown size={14} className={`text-[#a07080] shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl shadow-xl max-h-72 overflow-y-auto">
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-[#e8d5c4] rounded-xl shadow-[0_4px_12px_rgba(69,19,44,0.1)] max-h-72 overflow-y-auto">
           {(Object.keys(grouped) as TagCategory[]).map((category) => (
-            <div key={category} className="p-3 border-b border-[#2A2A2A] last:border-0">
-              <p className="text-[10px] font-semibold text-[#555] uppercase tracking-wider mb-2">
+            <div key={category} className="p-3 border-b border-[#f0e6d3] last:border-0">
+              <p className="text-[10px] font-semibold text-[#a07080] uppercase tracking-wider mb-2">
                 {CATEGORY_LABELS[category]}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -126,7 +126,7 @@ export default function TagPicker({ selected, onChange, customTags = [] }: TagPi
                         isSelected ? 'opacity-100' : 'opacity-60 hover:opacity-100'
                       }`}
                       style={{
-                        backgroundColor: isSelected ? tag.color + '33' : 'transparent',
+                        backgroundColor: isSelected ? tag.color + '22' : 'transparent',
                         color: tag.color,
                         borderColor: tag.color + '66',
                       }}

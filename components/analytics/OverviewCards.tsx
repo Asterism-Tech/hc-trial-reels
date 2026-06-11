@@ -22,7 +22,6 @@ export default function OverviewCards({ groups }: OverviewCardsProps) {
     ? Math.round(nonWinnerVersions.reduce((s, v) => s + v.views, 0) / nonWinnerVersions.length)
     : 0
 
-  // Best content theme by avg winner views
   const themeViews: Record<string, number[]> = {}
   for (const g of groups) {
     const winnerV = g.versions.find((v) => v.isWinner)
@@ -53,10 +52,10 @@ export default function OverviewCards({ groups }: OverviewCardsProps) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map((c) => (
-        <div key={c.label} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 animate-fadeIn">
-          <p className="text-xs text-[#666] mb-1">{c.label}</p>
-          <p className="text-2xl font-bold text-white mb-0.5">{c.value}</p>
-          <p className="text-xs text-[#555]">{c.sub}</p>
+        <div key={c.label} className="bg-white border border-[#e8d5c4] rounded-xl p-4 animate-fadeIn shadow-[0_2px_8px_rgba(69,19,44,0.06)]">
+          <p className="text-xs text-[#8a5a70] mb-1">{c.label}</p>
+          <p className="text-2xl font-bold text-[#45132c] mb-0.5">{c.value}</p>
+          <p className="text-xs text-[#a07080]">{c.sub}</p>
         </div>
       ))}
     </div>

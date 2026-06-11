@@ -66,39 +66,42 @@ export default function SettingsPage() {
     return acc
   }, {})
 
+  const inputClass = "w-full bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] placeholder-[#c0a0b0] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
+  const sectionClass = "bg-white border border-[#e8d5c4] rounded-xl p-5 shadow-[0_2px_8px_rgba(69,19,44,0.06)]"
+
   return (
     <div className="space-y-8 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="text-[#666] text-sm mt-1">Manage custom tags and integrations</p>
+        <h1 className="text-2xl font-bold text-[#45132c]">Settings</h1>
+        <p className="text-[#8a5a70] text-sm mt-1">Manage custom tags and integrations</p>
       </div>
 
       {/* Custom Tags */}
-      <section className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5">
-        <h2 className="text-base font-semibold text-white mb-1">Custom Tags</h2>
-        <p className="text-xs text-[#555] mb-4">Create custom tags to categorise your trial groups</p>
+      <section className={sectionClass}>
+        <h2 className="text-base font-semibold text-[#45132c] mb-1">Custom Tags</h2>
+        <p className="text-xs text-[#a07080] mb-4">Create custom tags to categorise your trial groups</p>
 
         {/* Add tag form */}
-        <div className="bg-[#0F0F0F] border border-[#2A2A2A] rounded-xl p-4 mb-4">
-          <h3 className="text-xs font-medium text-[#888] mb-3">Add New Tag</h3>
+        <div className="bg-[#faf9f7] border border-[#e8d5c4] rounded-xl p-4 mb-4">
+          <h3 className="text-xs font-medium text-[#8a5a70] mb-3">Add New Tag</h3>
           <div className="flex flex-wrap gap-3">
             <div className="flex-1 min-w-32">
-              <label className="block text-[10px] text-[#555] mb-1">Name</label>
+              <label className="block text-[10px] text-[#a07080] mb-1">Name</label>
               <input
                 type="text"
                 value={newTag.name}
                 onChange={(e) => setNewTag((p) => ({ ...p, name: e.target.value }))}
                 placeholder="my-custom-tag"
-                className="w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white placeholder-[#444] focus:outline-none focus:border-[#6B2D8B]"
+                className={inputClass}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
               />
             </div>
             <div>
-              <label className="block text-[10px] text-[#555] mb-1">Category</label>
+              <label className="block text-[10px] text-[#a07080] mb-1">Category</label>
               <select
                 value={newTag.category}
                 onChange={(e) => setNewTag((p) => ({ ...p, category: e.target.value as TagCategory }))}
-                className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#6B2D8B]"
+                className="bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
               >
                 {TAG_CATEGORIES.map((c) => (
                   <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
@@ -106,14 +109,14 @@ export default function SettingsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-[10px] text-[#555] mb-1">Colour</label>
+              <label className="block text-[10px] text-[#a07080] mb-1">Colour</label>
               <div className="flex gap-1.5 flex-wrap">
                 {PRESET_COLORS.map((c) => (
                   <button
                     key={c}
                     type="button"
                     onClick={() => setNewTag((p) => ({ ...p, color: c }))}
-                    className={`w-6 h-6 rounded-full border-2 transition-all ${newTag.color === c ? 'border-white scale-110' : 'border-transparent'}`}
+                    className={`w-6 h-6 rounded-full border-2 transition-all ${newTag.color === c ? 'border-[#45132c] scale-110' : 'border-transparent'}`}
                     style={{ backgroundColor: c }}
                   />
                 ))}
@@ -124,7 +127,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={handleAddTag}
                 disabled={adding}
-                className="flex items-center gap-1.5 px-3 py-2 bg-[#6B2D8B] hover:bg-[#7B3D9B] text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-2 bg-[#45132c] hover:bg-[#ed4a7e] text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
               >
                 <Plus size={14} />
                 Add
@@ -135,27 +138,27 @@ export default function SettingsPage() {
 
         {/* Custom tags list */}
         {loading ? (
-          <p className="text-xs text-[#555]">Loading...</p>
+          <p className="text-xs text-[#a07080]">Loading...</p>
         ) : customTags.length === 0 ? (
-          <p className="text-xs text-[#555] text-center py-4">No custom tags yet. Add one above.</p>
+          <p className="text-xs text-[#a07080] text-center py-4">No custom tags yet. Add one above.</p>
         ) : (
           <div className="space-y-1.5">
             {customTags.map((tag) => (
-              <div key={tag.id} className="flex items-center justify-between bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-3 py-2">
+              <div key={tag.id} className="flex items-center justify-between bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tag.color }} />
-                  <span className="text-sm text-white">{tag.name}</span>
-                  <span className="text-xs text-[#555]">{CATEGORY_LABELS[tag.category]}</span>
+                  <span className="text-sm text-[#45132c]">{tag.name}</span>
+                  <span className="text-xs text-[#a07080]">{CATEGORY_LABELS[tag.category]}</span>
                 </div>
                 {deleteConfirm === tag.id ? (
                   <div className="flex gap-2">
-                    <button onClick={() => handleDeleteTag(tag.id)} className="text-xs text-red-400 hover:text-red-300">Confirm</button>
-                    <button onClick={() => setDeleteConfirm(null)} className="text-xs text-[#555] hover:text-white">Cancel</button>
+                    <button onClick={() => handleDeleteTag(tag.id)} className="text-xs text-red-500 hover:text-red-700">Confirm</button>
+                    <button onClick={() => setDeleteConfirm(null)} className="text-xs text-[#a07080] hover:text-[#45132c]">Cancel</button>
                   </div>
                 ) : (
                   <button
                     onClick={() => setDeleteConfirm(tag.id)}
-                    className="text-[#444] hover:text-red-400 transition-colors"
+                    className="text-[#dcc8b0] hover:text-red-400 transition-colors"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -167,13 +170,13 @@ export default function SettingsPage() {
       </section>
 
       {/* Default Tag Presets */}
-      <section className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5">
-        <h2 className="text-base font-semibold text-white mb-1">Default Tag Presets</h2>
-        <p className="text-xs text-[#555] mb-4">Built-in tags available to all trial groups (read-only)</p>
+      <section className={sectionClass}>
+        <h2 className="text-base font-semibold text-[#45132c] mb-1">Default Tag Presets</h2>
+        <p className="text-xs text-[#a07080] mb-4">Built-in tags available to all trial groups (read-only)</p>
         <div className="space-y-4">
           {Object.entries(groupedPresets).map(([category, tags]) => (
             <div key={category}>
-              <p className="text-xs font-semibold text-[#555] uppercase tracking-wider mb-2">
+              <p className="text-xs font-semibold text-[#a07080] uppercase tracking-wider mb-2">
                 {CATEGORY_LABELS[category as TagCategory]}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -193,18 +196,18 @@ export default function SettingsPage() {
       </section>
 
       {/* Automation */}
-      <section className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-5">
-        <h2 className="text-base font-semibold text-white mb-1">Automate Stats Collection</h2>
-        <p className="text-xs text-[#555] mb-4">
+      <section className={sectionClass}>
+        <h2 className="text-base font-semibold text-[#45132c] mb-1">Automate Stats Collection</h2>
+        <p className="text-xs text-[#a07080] mb-4">
           Connect to social platforms to pull stats automatically instead of entering them manually.
         </p>
 
         <div className="space-y-3">
-          <div className="bg-[#0F0F0F] border border-[#2A2A2A] rounded-xl p-4">
+          <div className="bg-[#faf9f7] border border-[#e8d5c4] rounded-xl p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-sm font-semibold text-white mb-1">Instagram Graph API</h3>
-                <p className="text-xs text-[#666] max-w-md">
+                <h3 className="text-sm font-semibold text-[#45132c] mb-1">Instagram Graph API</h3>
+                <p className="text-xs text-[#8a5a70] max-w-md">
                   Views, reach, likes, comments, shares, saves, profile visits, and completion rate are available
                   via the Instagram Graph API for Business/Creator accounts. Requires an approved Meta App.
                 </p>
@@ -212,22 +215,22 @@ export default function SettingsPage() {
               <div className="relative group shrink-0">
                 <button
                   disabled
-                  className="px-3 py-1.5 bg-[#2A2A2A] text-[#555] text-xs font-medium rounded-lg cursor-not-allowed"
+                  className="px-3 py-1.5 bg-[#f0e6d3] text-[#a07080] text-xs font-medium rounded-lg cursor-not-allowed"
                 >
                   Connect Instagram
                 </button>
-                <div className="absolute right-0 bottom-full mb-2 w-52 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 py-2 text-[10px] text-[#888] hidden group-hover:block shadow-xl z-10">
+                <div className="absolute right-0 bottom-full mb-2 w-52 bg-white border border-[#e8d5c4] rounded-lg px-3 py-2 text-[10px] text-[#8a5a70] hidden group-hover:block shadow-[0_4px_12px_rgba(69,19,44,0.1)] z-10">
                   Coming soon — requires an Instagram Business API app approval
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#0F0F0F] border border-[#2A2A2A] rounded-xl p-4">
+          <div className="bg-[#faf9f7] border border-[#e8d5c4] rounded-xl p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-sm font-semibold text-white mb-1">TikTok Research API</h3>
-                <p className="text-xs text-[#666] max-w-md">
+                <h3 className="text-sm font-semibold text-[#45132c] mb-1">TikTok Research API</h3>
+                <p className="text-xs text-[#8a5a70] max-w-md">
                   Similar stats available for TikTok Business accounts via the TikTok Research API.
                   Requires a TikTok developer account and app approval.
                 </p>
@@ -235,27 +238,27 @@ export default function SettingsPage() {
               <div className="relative group shrink-0">
                 <button
                   disabled
-                  className="px-3 py-1.5 bg-[#2A2A2A] text-[#555] text-xs font-medium rounded-lg cursor-not-allowed"
+                  className="px-3 py-1.5 bg-[#f0e6d3] text-[#a07080] text-xs font-medium rounded-lg cursor-not-allowed"
                 >
                   Connect TikTok
                 </button>
-                <div className="absolute right-0 bottom-full mb-2 w-52 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 py-2 text-[10px] text-[#888] hidden group-hover:block shadow-xl z-10">
+                <div className="absolute right-0 bottom-full mb-2 w-52 bg-white border border-[#e8d5c4] rounded-lg px-3 py-2 text-[10px] text-[#8a5a70] hidden group-hover:block shadow-[0_4px_12px_rgba(69,19,44,0.1)] z-10">
                   Coming soon — requires a TikTok Business API app approval
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#0F0F0F] border border-[#2A2A2A] rounded-xl p-4">
-            <h3 className="text-sm font-semibold text-white mb-1">Scheduled Refresh</h3>
-            <p className="text-xs text-[#666]">
+          <div className="bg-[#faf9f7] border border-[#e8d5c4] rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-[#45132c] mb-1">Scheduled Refresh</h3>
+            <p className="text-xs text-[#8a5a70]">
               Once connected, stats will sync every 24 hours automatically via a Vercel cron job.
               No manual data entry required.
             </p>
           </div>
         </div>
 
-        <p className="text-[10px] text-[#444] mt-4">
+        <p className="text-[10px] text-[#b09090] mt-4">
           To enable live stat sync, an Instagram Business account and approved Graph API app are required.
           Contact your developer to set this up.
         </p>

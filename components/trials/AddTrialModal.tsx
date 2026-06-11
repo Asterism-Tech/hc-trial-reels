@@ -135,15 +135,15 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-fadeIn">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white border border-[#e8d5c4] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-[0_8px_32px_rgba(69,19,44,0.15)] animate-fadeIn">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2A2A2A] sticky top-0 bg-[#1A1A1A] z-10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8d5c4] sticky top-0 bg-white z-10">
           <div>
-            <h2 className="text-lg font-semibold text-white">New Trial Group</h2>
-            <p className="text-xs text-[#666] mt-0.5">Step {step} of 2</p>
+            <h2 className="text-lg font-semibold text-[#45132c]">New Trial Group</h2>
+            <p className="text-xs text-[#a07080] mt-0.5">Step {step} of 2</p>
           </div>
-          <button onClick={onClose} className="text-[#555] hover:text-white transition-colors">
+          <button onClick={onClose} className="text-[#b09090] hover:text-[#45132c] transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -152,29 +152,29 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
           {step === 1 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-[#888] mb-1.5">Group Name *</label>
+                <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Group Name *</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Upcycled Mirror Ball Letter"
-                  className="w-full bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white placeholder-[#444] focus:outline-none focus:border-[#6B2D8B]"
+                  className="w-full bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] placeholder-[#c0a0b0] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#888] mb-1.5">Test Type</label>
+                <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Test Type</label>
                 <select
                   value={testType}
                   onChange={(e) => setTestType(e.target.value)}
-                  className="w-full bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#6B2D8B]"
+                  className="w-full bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
                 >
                   {TEST_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#888] mb-1.5">Content Theme</label>
+                <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Content Theme</label>
                 <div className="flex flex-wrap gap-2">
                   {CONTENT_THEMES.map((theme) => (
                     <button
@@ -183,10 +183,10 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
                       onClick={() => setContentTheme((prev) =>
                         prev.includes(theme) ? prev.filter((t) => t !== theme) : [...prev, theme]
                       )}
-                      className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
+                      className={`px-3 py-1.5 rounded-lg text-xs border transition-all duration-200 ${
                         contentTheme.includes(theme)
-                          ? 'bg-[#6B2D8B]/20 border-[#6B2D8B]/50 text-[#A855D4]'
-                          : 'bg-transparent border-[#2A2A2A] text-[#666] hover:border-[#444]'
+                          ? 'bg-[#45132c]/10 border-[#45132c]/30 text-[#45132c]'
+                          : 'bg-transparent border-[#e8d5c4] text-[#8a5a70] hover:border-[#dcc8b0]'
                       }`}
                     >
                       {theme}
@@ -196,52 +196,52 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#888] mb-1.5">Number of Versions</label>
+                <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Number of Versions</label>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => numVersions > 2 && updateVersions(numVersions - 1)}
-                    className="w-8 h-8 flex items-center justify-center bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors disabled:opacity-40"
+                    className="w-8 h-8 flex items-center justify-center bg-[#f0e6d3] rounded-lg hover:bg-[#e8d5c4] transition-colors disabled:opacity-40"
                     disabled={numVersions <= 2}
                   >
                     <Minus size={14} />
                   </button>
-                  <span className="text-lg font-semibold w-6 text-center">{numVersions}</span>
+                  <span className="text-lg font-semibold w-6 text-center text-[#45132c]">{numVersions}</span>
                   <button
                     type="button"
                     onClick={() => numVersions < 5 && updateVersions(numVersions + 1)}
-                    className="w-8 h-8 flex items-center justify-center bg-[#2A2A2A] rounded-lg hover:bg-[#3A3A3A] transition-colors disabled:opacity-40"
+                    className="w-8 h-8 flex items-center justify-center bg-[#f0e6d3] rounded-lg hover:bg-[#e8d5c4] transition-colors disabled:opacity-40"
                     disabled={numVersions >= 5}
                   >
                     <Plus size={14} />
                   </button>
-                  <span className="text-xs text-[#555]">2–5 versions</span>
+                  <span className="text-xs text-[#a07080]">2–5 versions</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-[#888] mb-1.5">Upload Date</label>
+                  <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Upload Date</label>
                   <input
                     type="date"
                     value={uploadDate}
                     onChange={(e) => setUploadDate(e.target.value)}
-                    className="w-full bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#6B2D8B] [color-scheme:dark]"
+                    className="w-full bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all [color-scheme:light]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[#888] mb-1.5">Publish Date</label>
+                  <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Publish Date</label>
                   <input
                     type="date"
                     value={publishDate}
                     onChange={(e) => setPublishDate(e.target.value)}
-                    className="w-full bg-[#0F0F0F] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#6B2D8B] [color-scheme:dark]"
+                    className="w-full bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all [color-scheme:light]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#888] mb-1.5">Tags</label>
+                <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Tags</label>
                 <TagPicker selected={tags} onChange={setTags} />
               </div>
             </div>
@@ -250,22 +250,22 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
           {step === 2 && (
             <div className="space-y-6">
               {versions.map((v, i) => (
-                <div key={i} className="bg-[#0F0F0F] border border-[#2A2A2A] rounded-xl p-4">
-                  <h3 className="text-sm font-semibold text-white mb-3">Version {i + 1}</h3>
+                <div key={i} className="bg-[#faf9f7] border border-[#e8d5c4] rounded-xl p-4">
+                  <h3 className="text-sm font-semibold text-[#45132c] mb-3">Version {i + 1}</h3>
 
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-xs text-[#666] mb-1.5">Platform</label>
+                      <label className="block text-xs text-[#8a5a70] mb-1.5">Platform</label>
                       <div className="flex flex-wrap gap-2">
                         {PLATFORMS.map((p) => (
                           <button
                             key={p}
                             type="button"
                             onClick={() => togglePlatform(i, p)}
-                            className={`px-3 py-1 rounded-lg text-xs border transition-colors ${
+                            className={`px-3 py-1 rounded-lg text-xs border transition-all duration-200 ${
                               v.platform.includes(p)
-                                ? 'bg-[#6B2D8B]/20 border-[#6B2D8B]/50 text-[#A855D4]'
-                                : 'border-[#2A2A2A] text-[#666] hover:border-[#444]'
+                                ? 'bg-[#45132c]/10 border-[#45132c]/30 text-[#45132c]'
+                                : 'border-[#e8d5c4] text-[#8a5a70] hover:border-[#dcc8b0]'
                             }`}
                           >
                             {p}
@@ -276,47 +276,47 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs text-[#666] mb-1.5">Hook Type</label>
+                        <label className="block text-xs text-[#8a5a70] mb-1.5">Hook Type</label>
                         <select
                           value={v.hookType}
                           onChange={(e) => updateVersion(i, 'hookType', e.target.value)}
-                          className="w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#6B2D8B]"
+                          className="w-full bg-white border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
                         >
                           <option value="">Select...</option>
                           {HOOK_TYPES.map((h) => <option key={h} value={h}>{h}</option>)}
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs text-[#666] mb-1.5">Video Length (seconds)</label>
+                        <label className="block text-xs text-[#8a5a70] mb-1.5">Video Length (seconds)</label>
                         <input
                           type="number"
                           value={v.videoLengthSeconds}
                           onChange={(e) => updateVersion(i, 'videoLengthSeconds', e.target.value)}
                           placeholder="e.g. 45"
-                          className="w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white placeholder-[#444] focus:outline-none focus:border-[#6B2D8B]"
+                          className="w-full bg-white border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] placeholder-[#c0a0b0] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs text-[#666] mb-1.5">Hook Text</label>
+                      <label className="block text-xs text-[#8a5a70] mb-1.5">Hook Text</label>
                       <input
                         type="text"
                         value={v.hookText}
                         onChange={(e) => updateVersion(i, 'hookText', e.target.value)}
                         placeholder="Opening line or visual description..."
-                        className="w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white placeholder-[#444] focus:outline-none focus:border-[#6B2D8B]"
+                        className="w-full bg-white border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] placeholder-[#c0a0b0] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs text-[#666] mb-1.5">What&apos;s Different</label>
+                      <label className="block text-xs text-[#8a5a70] mb-1.5">What&apos;s Different</label>
                       <input
                         type="text"
                         value={v.differences}
                         onChange={(e) => updateVersion(i, 'differences', e.target.value)}
                         placeholder="Describe the variable being tested..."
-                        className="w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 py-2 text-sm text-white placeholder-[#444] focus:outline-none focus:border-[#6B2D8B]"
+                        className="w-full bg-white border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] placeholder-[#c0a0b0] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
                       />
                     </div>
                   </div>
@@ -327,17 +327,17 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[#2A2A2A] sticky bottom-0 bg-[#1A1A1A]">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[#e8d5c4] sticky bottom-0 bg-white">
           <button
             onClick={step === 1 ? onClose : () => setStep(1)}
-            className="px-4 py-2 text-sm text-[#888] hover:text-white transition-colors"
+            className="px-4 py-2 text-sm text-[#8a5a70] hover:text-[#45132c] transition-colors"
           >
             {step === 1 ? 'Cancel' : 'Back'}
           </button>
           <button
             onClick={step === 1 ? () => setStep(2) : handleSubmit}
             disabled={submitting}
-            className="px-5 py-2 bg-[#6B2D8B] hover:bg-[#7B3D9B] text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+            className="px-5 py-2 bg-[#45132c] hover:bg-[#ed4a7e] text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
           >
             {step === 1 ? 'Next →' : submitting ? 'Creating...' : 'Create Trial Group'}
           </button>

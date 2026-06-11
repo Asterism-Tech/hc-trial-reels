@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+
+const poppins = Poppins({
+  weight: ['400', '600', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "Hobbycraft Reel Hub",
@@ -13,16 +20,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="antialiased bg-[#0F0F0F] text-[#F5F5F5] min-h-screen">
+    <html lang="en">
+      <body className={`${poppins.className} antialiased bg-[#faf9f7] text-[#45132c] min-h-screen`}>
         {children}
         <Toaster
-          theme="dark"
+          theme="light"
           toastOptions={{
             style: {
-              background: '#1A1A1A',
-              border: '1px solid #2A2A2A',
-              color: '#F5F5F5',
+              background: '#ffffff',
+              border: '1px solid #e8d5c4',
+              color: '#45132c',
             },
           }}
         />

@@ -61,7 +61,7 @@ function InlineStatEdit({
         value={localVal}
         onChange={(e) => handleChange(e.target.value)}
         onBlur={() => setEditing(false)}
-        className="w-20 bg-[#0F0F0F] border border-[#6B2D8B] rounded px-1.5 py-0.5 text-xs text-white focus:outline-none"
+        className="w-20 bg-[#faf9f7] border border-[#45132c] rounded px-1.5 py-0.5 text-xs text-[#45132c] focus:outline-none"
         step={field === 'completionRatePct' ? '0.01' : '1'}
       />
     )
@@ -71,7 +71,7 @@ function InlineStatEdit({
     <button
       type="button"
       onClick={() => setEditing(true)}
-      className="text-xs text-white hover:text-[#A855D4] transition-colors cursor-pointer font-mono"
+      className="text-xs text-[#45132c] hover:text-[#ed4a7e] transition-colors cursor-pointer font-mono"
       title="Click to edit"
     >
       {String(version[field] ?? '—')}
@@ -85,7 +85,6 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
   const debounceRefs = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
   const handleStatSave = useCallback((versionId: string, snakeField: string, value: number) => {
-    // Optimistic update
     setVersions((prev) =>
       prev.map((v) => {
         if (v.id !== versionId) return v
@@ -136,30 +135,29 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
   }, [])
 
   return (
-    <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden animate-fadeIn">
+    <div className="bg-white border border-[#e8d5c4] rounded-xl overflow-hidden animate-fadeIn shadow-[0_2px_8px_rgba(69,19,44,0.06)] hover:shadow-[0_4px_16px_rgba(69,19,44,0.1)] transition-all duration-200">
       {/* Card Header */}
       <div
-        className="flex items-start justify-between p-4 cursor-pointer hover:bg-[#1F1F1F] transition-colors"
+        className="flex items-start justify-between p-4 cursor-pointer hover:bg-[#faf9f7] transition-colors"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-2">
-            <h3 className="font-semibold text-white text-sm truncate">{group.name}</h3>
+            <h3 className="font-semibold text-[#45132c] text-sm truncate">{group.name}</h3>
             <Badge variant={statusBadgeVariant(group.status)}>
               {group.status.charAt(0).toUpperCase() + group.status.slice(1)}
             </Badge>
             {group.testType && (
-              <span className="text-xs px-2 py-0.5 bg-[#2A2A2A] text-[#888] rounded-full">{group.testType}</span>
+              <span className="text-xs px-2 py-0.5 bg-[#f0e6d3] text-[#8a5a70] rounded-full">{group.testType}</span>
             )}
           </div>
           {group.contentTheme.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-2">
               {group.contentTheme.map((theme) => (
-                <span key={theme} className="text-[10px] text-[#555] bg-[#222] px-2 py-0.5 rounded">{theme}</span>
+                <span key={theme} className="text-[10px] text-[#a07080] bg-[#f5eee4] px-2 py-0.5 rounded">{theme}</span>
               ))}
             </div>
           )}
-          {/* Version chips */}
           <div className="flex flex-wrap gap-1.5">
             {versions.map((v) => (
               <VersionChip key={v.id} version={v} />
@@ -168,26 +166,26 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
         </div>
         <div className="flex items-center gap-3 ml-4 shrink-0">
           <div className="text-right hidden sm:block">
-            <p className="text-xs text-[#555]">Published</p>
-            <p className="text-xs text-[#888]">{formatDate(group.publishDate)}</p>
+            <p className="text-xs text-[#a07080]">Published</p>
+            <p className="text-xs text-[#8a5a70]">{formatDate(group.publishDate)}</p>
           </div>
-          {expanded ? <ChevronUp size={16} className="text-[#555]" /> : <ChevronDown size={16} className="text-[#555]" />}
+          {expanded ? <ChevronUp size={16} className="text-[#a07080]" /> : <ChevronDown size={16} className="text-[#a07080]" />}
         </div>
       </div>
 
       {/* Expanded */}
       {expanded && (
-        <div className="border-t border-[#2A2A2A] p-4 space-y-6">
+        <div className="border-t border-[#e8d5c4] p-4 space-y-6">
           {/* Comparison table */}
           <div>
-            <h4 className="text-xs font-semibold text-[#666] uppercase tracking-wider mb-3">Version Comparison</h4>
+            <h4 className="text-xs font-semibold text-[#8a5a70] uppercase tracking-wider mb-3">Version Comparison</h4>
             <VersionComparisonTable versions={versions} />
           </div>
 
           {/* Stat bars */}
           {versions.some((v) => v.views > 0) && (
             <div>
-              <h4 className="text-xs font-semibold text-[#666] uppercase tracking-wider mb-3">Performance</h4>
+              <h4 className="text-xs font-semibold text-[#8a5a70] uppercase tracking-wider mb-3">Performance</h4>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatBar versions={versions} stat="views" label="Views" />
                 <StatBar versions={versions} stat="completionRatePct" label="Completion %" unit="%" />
@@ -200,11 +198,11 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
           {/* Per-version panels */}
           <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${Math.min(versions.length, 3)}, 1fr)` }}>
             {versions.map((v) => (
-              <div key={v.id} className={`bg-[#0F0F0F] rounded-xl p-4 border ${v.isWinner ? 'border-[#F5B942]/30' : 'border-[#2A2A2A]'}`}>
+              <div key={v.id} className={`bg-[#faf9f7] rounded-xl p-4 border ${v.isWinner ? 'border-[#F5B942]/50' : 'border-[#e8d5c4]'}`}>
                 {/* Version header */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className={`text-sm font-bold ${v.isWinner ? 'text-[#F5B942]' : 'text-white'}`}>
+                    <span className={`text-sm font-bold ${v.isWinner ? 'text-[#b87d00]' : 'text-[#45132c]'}`}>
                       V{v.versionNumber} {v.isWinner ? '👑' : ''}
                     </span>
                   </div>
@@ -212,10 +210,10 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
                     <button
                       type="button"
                       onClick={() => handleSetWinner(v.id)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-colors ${
+                      className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
                         v.isWinner
-                          ? 'bg-[#F5B942]/20 text-[#F5B942] border border-[#F5B942]/30'
-                          : 'bg-[#1A1A1A] text-[#555] border border-[#2A2A2A] hover:text-[#F5B942] hover:border-[#F5B942]/30'
+                          ? 'bg-[#F5B942]/20 text-[#b87d00] border border-[#F5B942]/40'
+                          : 'bg-white text-[#a07080] border border-[#e8d5c4] hover:text-[#b87d00] hover:border-[#F5B942]/40'
                       }`}
                       title={v.isWinner ? 'Winner' : 'Mark as winner'}
                     >
@@ -225,10 +223,10 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
                     <button
                       type="button"
                       onClick={() => handleTogglePublished(v.id, v.isPublished)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-colors ${
+                      className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
                         v.isPublished
-                          ? 'bg-[#6B2D8B]/20 text-[#A855D4] border border-[#6B2D8B]/30'
-                          : 'bg-[#1A1A1A] text-[#555] border border-[#2A2A2A] hover:text-[#A855D4]'
+                          ? 'bg-[#45132c]/10 text-[#45132c] border border-[#45132c]/20'
+                          : 'bg-white text-[#a07080] border border-[#e8d5c4] hover:text-[#45132c]'
                       }`}
                     >
                       {v.isPublished ? <Eye size={10} /> : <EyeOff size={10} />}
@@ -250,7 +248,7 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
                 <div className="space-y-1.5 mb-3">
                   {STAT_FIELDS.map((sf) => (
                     <div key={sf.key} className="flex items-center justify-between">
-                      <span className="text-[10px] text-[#555]">{sf.label}</span>
+                      <span className="text-[10px] text-[#a07080]">{sf.label}</span>
                       <InlineStatEdit
                         version={v}
                         field={sf.key}
@@ -263,7 +261,7 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
 
                 {/* Team comments */}
                 <div>
-                  <p className="text-[10px] text-[#555] mb-1">Team Comments</p>
+                  <p className="text-[10px] text-[#a07080] mb-1">Team Comments</p>
                   <TeamCommentArea
                     versionId={v.id}
                     initial={v.teamComments}
@@ -298,7 +296,7 @@ function TeamCommentArea({
       }}
       rows={2}
       placeholder="Add team notes..."
-      className="w-full bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-2 py-1.5 text-xs text-[#ccc] placeholder-[#333] focus:outline-none focus:border-[#6B2D8B] resize-none"
+      className="w-full bg-white border border-[#e8d5c4] rounded-lg px-2 py-1.5 text-xs text-[#5a2040] placeholder-[#c0a0b0] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all resize-none"
     />
   )
 }

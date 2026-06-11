@@ -30,12 +30,12 @@ export default function TrialDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/trials" className="text-[#555] hover:text-white transition-colors">
+        <Link href="/trials" className="text-[#a07080] hover:text-[#45132c] transition-colors">
           <ArrowLeft size={18} />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-white">{group?.name ?? 'Trial Group'}</h1>
-          <p className="text-[#666] text-xs mt-0.5">Trial Reel detail view</p>
+          <h1 className="text-xl font-bold text-[#45132c]">{group?.name ?? 'Trial Group'}</h1>
+          <p className="text-[#8a5a70] text-xs mt-0.5">Trial Reel detail view</p>
         </div>
       </div>
 

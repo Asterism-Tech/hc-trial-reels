@@ -17,7 +17,7 @@ interface CachedInsights extends AIInsights {
 
 const SECTIONS = [
   { key: 'shortTermInsights' as const, label: 'Short-term', emoji: '💡', description: 'Last 30 days', icon: Lightbulb, color: '#F5B942' },
-  { key: 'longTermInsights' as const, label: 'Long-term', emoji: '📊', description: 'All time trends', icon: BarChart2, color: '#6B2D8B' },
+  { key: 'longTermInsights' as const, label: 'Long-term', emoji: '📊', description: 'All time trends', icon: BarChart2, color: '#45132c' },
   { key: 'contentSuggestions' as const, label: 'Content Suggestions', emoji: '🎯', description: 'Ideas to test next', icon: Target, color: '#22C55E' },
   { key: 'watchOut' as const, label: 'Watch Out', emoji: '⚠️', description: 'Underperformance warnings', icon: AlertTriangle, color: '#EF4444' },
 ]
@@ -54,8 +54,8 @@ export default function InsightsPanel({ groups }: InsightsPanelProps) {
 
   if (groups.length === 0) return (
     <div className="flex flex-col gap-4">
-      <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-6 text-center">
-        <p className="text-[#555] text-sm">Add some trial groups first to generate insights.</p>
+      <div className="bg-white border border-[#e8d5c4] rounded-xl p-6 text-center shadow-[0_2px_8px_rgba(69,19,44,0.06)]">
+        <p className="text-[#a07080] text-sm">Add some trial groups first to generate insights.</p>
       </div>
     </div>
   )
@@ -67,20 +67,20 @@ export default function InsightsPanel({ groups }: InsightsPanelProps) {
   )
 
   if (error) return (
-    <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
-      <p className="text-red-400 text-sm">{error}</p>
-      <button onClick={() => fetchInsights()} className="mt-2 text-xs text-red-400 hover:text-red-300 underline">Retry</button>
+    <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+      <p className="text-red-600 text-sm">{error}</p>
+      <button onClick={() => fetchInsights()} className="mt-2 text-xs text-red-500 hover:text-red-700 underline">Retry</button>
     </div>
   )
 
   return (
     <div className="space-y-3">
       {insights && (
-        <div className="flex items-center justify-between text-xs text-[#555] px-1">
+        <div className="flex items-center justify-between text-xs text-[#a07080] px-1">
           <span>Last updated {timeAgo(insights.refreshedAt)}{insights.fromCache ? ' (cached)' : ''}</span>
           <button
             onClick={() => fetchInsights(true)}
-            className="flex items-center gap-1 text-[#6B2D8B] hover:text-[#9B4DBB] transition-colors"
+            className="flex items-center gap-1 text-[#45132c] hover:text-[#ed4a7e] transition-colors"
           >
             <RefreshCw size={12} />
             Refresh
@@ -91,20 +91,20 @@ export default function InsightsPanel({ groups }: InsightsPanelProps) {
       {insights && SECTIONS.map((section) => (
         <div
           key={section.key}
-          className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 animate-fadeIn"
+          className="bg-white border border-[#e8d5c4] rounded-xl p-4 animate-fadeIn shadow-[0_2px_8px_rgba(69,19,44,0.06)]"
           style={{ borderLeftColor: section.color, borderLeftWidth: 3 }}
         >
           <div className="flex items-center gap-2 mb-3">
             <span className="text-base">{section.emoji}</span>
             <div>
-              <h3 className="text-sm font-semibold text-white">{section.label}</h3>
-              <p className="text-[10px] text-[#555]">{section.description}</p>
+              <h3 className="text-sm font-semibold text-[#45132c]">{section.label}</h3>
+              <p className="text-[10px] text-[#a07080]">{section.description}</p>
             </div>
           </div>
           <ul className="space-y-1.5">
             {(insights[section.key] as string[]).map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-[#ccc]">
-                <span className="text-[#444] mt-0.5 shrink-0">•</span>
+              <li key={i} className="flex items-start gap-2 text-xs text-[#5a2040]">
+                <span className="text-[#dcc8b0] mt-0.5 shrink-0">•</span>
                 <span>{item}</span>
               </li>
             ))}

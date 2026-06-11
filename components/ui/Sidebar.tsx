@@ -22,14 +22,14 @@ export default function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed left-0 top-0 h-full bg-[#1A1A1A] border-r border-[#2A2A2A] z-40 flex flex-col transition-all duration-200 w-14 lg:w-56 xl:w-60">
+    <aside className="fixed left-0 top-0 h-full bg-white border-r border-[#e8d5c4] z-40 flex flex-col transition-all duration-200 w-14 lg:w-56 xl:w-60">
       {/* Logo */}
-      <div className="px-3 lg:px-5 py-5 border-b border-[#2A2A2A] flex items-center justify-center lg:justify-start">
-        <span className="text-xl font-bold text-[#6B2D8B] hidden lg:block tracking-tight">
+      <div className="px-3 lg:px-5 py-5 border-b border-[#e8d5c4] flex items-center justify-center lg:justify-start">
+        <span className="text-xl font-bold text-[#45132c] hidden lg:block tracking-tight">
           Hobbycraft
         </span>
-        <span className="text-xs text-[#888] mt-0.5 hidden lg:block ml-1">&nbsp;Reel Hub</span>
-        <span className="text-xl font-bold text-[#6B2D8B] lg:hidden">H</span>
+        <span className="text-xs text-[#a07080] mt-0.5 hidden lg:block ml-1">&nbsp;Reel Hub</span>
+        <span className="text-xl font-bold text-[#45132c] lg:hidden">H</span>
       </div>
 
       {/* Nav */}
@@ -41,10 +41,10 @@ export default function Sidebar() {
               key={href}
               href={href}
               title={label}
-              className={`flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group ${
+              className={`flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
                 active
-                  ? 'bg-[#6B2D8B]/20 text-[#6B2D8B]'
-                  : 'text-[#999] hover:text-white hover:bg-[#2A2A2A]'
+                  ? 'bg-[#45132c]/10 text-[#45132c]'
+                  : 'text-[#8a5a70] hover:text-[#45132c] hover:bg-[#f5eee4]'
               }`}
             >
               <Icon size={18} className="shrink-0" />
@@ -55,9 +55,9 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-3 lg:px-5 py-4 border-t border-[#2A2A2A] flex justify-center lg:justify-start">
-        <p className="text-[10px] text-[#555] hidden lg:block">v1.0.0</p>
-        <p className="text-[10px] text-[#555] lg:hidden">···</p>
+      <div className="px-3 lg:px-5 py-4 border-t border-[#e8d5c4] flex justify-center lg:justify-start">
+        <p className="text-[10px] text-[#b09090] hidden lg:block">v1.0.0</p>
+        <p className="text-[10px] text-[#b09090] lg:hidden">···</p>
       </div>
     </aside>
   )

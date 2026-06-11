@@ -8,7 +8,7 @@ import { formatNumber } from '@/lib/utils'
 
 interface Props { groups: TrialGroup[] }
 
-const COLORS = ['#6B2D8B', '#9B4DBB', '#C56DE5', '#A855D4', '#D8A8F0']
+const COLORS = ['#45132c', '#6b2e4d', '#9a4d70', '#ed4a7e', '#f5a3c7']
 
 export default function ViewsByVersionChart({ groups }: Props) {
   const data = groups
@@ -23,7 +23,7 @@ export default function ViewsByVersionChart({ groups }: Props) {
     })
 
   if (data.length === 0) return (
-    <div className="flex items-center justify-center h-48 text-[#555] text-sm">No view data yet</div>
+    <div className="flex items-center justify-center h-48 text-[#a07080] text-sm">No view data yet</div>
   )
 
   const maxVersions = Math.max(...groups.map((g) => g.versions.length))
@@ -34,19 +34,19 @@ export default function ViewsByVersionChart({ groups }: Props) {
       <BarChart data={data} margin={{ top: 5, right: 10, bottom: 30, left: 10 }}>
         <XAxis
           dataKey="name"
-          tick={{ fontSize: 10, fill: '#666' }}
+          tick={{ fontSize: 10, fill: '#8a5a70' }}
           axisLine={false}
           tickLine={false}
           angle={-20}
           textAnchor="end"
         />
-        <YAxis tick={{ fontSize: 10, fill: '#666' }} axisLine={false} tickLine={false} tickFormatter={formatNumber} />
+        <YAxis tick={{ fontSize: 10, fill: '#8a5a70' }} axisLine={false} tickLine={false} tickFormatter={formatNumber} />
         <Tooltip
-          contentStyle={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: 8, fontSize: 11 }}
+          contentStyle={{ background: '#ffffff', border: '1px solid #e8d5c4', borderRadius: 8, fontSize: 11, color: '#45132c' }}
           formatter={(val: unknown) => [formatNumber(Number(val)), '']}
-          cursor={{ fill: '#ffffff08' }}
+          cursor={{ fill: '#45132c08' }}
         />
-        <Legend wrapperStyle={{ fontSize: 10, color: '#666' }} />
+        <Legend wrapperStyle={{ fontSize: 10, color: '#8a5a70' }} />
         {versionKeys.map((key, i) => (
           <Bar key={key} dataKey={key} radius={[3, 3, 0, 0]}>
             {data.map((entry, idx) => (
