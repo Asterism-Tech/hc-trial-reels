@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { Version } from '@/lib/types'
 import TagPicker from './TagPicker'
 import { versionColor } from '@/lib/version-colors'
+import ModalPortal from '@/components/ui/ModalPortal'
 
 const PLATFORMS = ['Instagram', 'TikTok', 'Facebook', 'YouTube Shorts']
 const HOOK_TYPES = ['Visual', 'Audio', 'Text', 'Question']
@@ -61,6 +62,7 @@ export default function EditVersionModal({ version, onClose, onSaved }: EditVers
   const color = versionColor(version.versionNumber)
 
   return (
+    <ModalPortal>
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white border border-[#e8d5c4] rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-[0_8px_32px_rgba(69,19,44,0.15)] animate-scaleIn">
@@ -156,5 +158,6 @@ export default function EditVersionModal({ version, onClose, onSaved }: EditVers
         </div>
       </div>
     </div>
+    </ModalPortal>
   )
 }

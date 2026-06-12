@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import { TrialGroup } from '@/lib/types'
 import TagPicker from './TagPicker'
+import ModalPortal from '@/components/ui/ModalPortal'
 
 const TEST_TYPES = [
   'Voiceover Test', 'Hook Test', 'Visual Opening',
@@ -58,6 +59,7 @@ export default function EditTrialGroupModal({ group, onClose, onSaved }: EditTri
   const inputClass = "w-full bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] placeholder-[#c0a0b0] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
 
   return (
+    <ModalPortal>
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white border border-[#e8d5c4] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-[0_8px_32px_rgba(69,19,44,0.15)] animate-scaleIn">
@@ -148,5 +150,6 @@ export default function EditTrialGroupModal({ group, onClose, onSaved }: EditTri
         </div>
       </div>
     </div>
+    </ModalPortal>
   )
 }
