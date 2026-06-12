@@ -137,7 +137,7 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white border border-[#e8d5c4] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-[0_8px_32px_rgba(69,19,44,0.15)] animate-fadeIn">
+      <div className="relative bg-white border border-[#e8d5c4] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-[0_8px_32px_rgba(69,19,44,0.15)] animate-scaleIn">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8d5c4] sticky top-0 bg-white z-10">
           <div>
@@ -335,7 +335,7 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
           <button
             onClick={step === 1 ? () => setStep(2) : handleSubmit}
             disabled={submitting}
-            className="px-5 py-2 bg-[#45132c] hover:bg-[#ed4a7e] text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
+            className="px-5 py-2 bg-[#45132c] hover:bg-[#ed4a7e] text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] pressable hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
           >
             {step === 1 ? 'Next →' : submitting ? 'Creating...' : 'Create Trial Group'}
           </button>

@@ -34,6 +34,36 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(12px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        scaleIn: {
+          "0%": { opacity: "0", transform: "scale(0.95) translateY(8px)" },
+          "100%": { opacity: "1", transform: "scale(1) translateY(0)" },
+        },
+        popIn: {
+          "0%": { opacity: "0", transform: "scale(0.8)" },
+          "70%": { transform: "scale(1.04)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        bellSwing: {
+          "0%, 24%, 100%": { transform: "rotate(0deg)" },
+          "4%": { transform: "rotate(14deg)" },
+          "8%": { transform: "rotate(-12deg)" },
+          "12%": { transform: "rotate(8deg)" },
+          "16%": { transform: "rotate(-5deg)" },
+          "20%": { transform: "rotate(2deg)" },
+        },
+        floaty: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-6px)" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        crownTwinkle: {
+          "0%, 85%, 100%": { transform: "scale(1) rotate(0deg)" },
+          "90%": { transform: "scale(1.25) rotate(-8deg)" },
+          "95%": { transform: "scale(1.1) rotate(6deg)" },
+        },
         stitch: {
           "0%, 100%": { opacity: "0.4" },
           "50%": { opacity: "1" },
@@ -45,7 +75,13 @@ const config: Config = {
       },
       animation: {
         fadeIn: "fadeIn 300ms cubic-bezier(0.4, 0, 0.2, 1)",
-        slideUp: "slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+        slideUp: "slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1) both",
+        scaleIn: "scaleIn 250ms cubic-bezier(0.4, 0, 0.2, 1) both",
+        popIn: "popIn 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both",
+        bellSwing: "bellSwing 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite",
+        floaty: "floaty 3.5s ease-in-out infinite",
+        shimmer: "shimmer 1.8s linear infinite",
+        crownTwinkle: "crownTwinkle 5s ease-in-out infinite",
         "pulse3dot": "stitch 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite",
       },
     },

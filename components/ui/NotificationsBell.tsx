@@ -49,18 +49,18 @@ export default function NotificationsBell() {
         type="button"
         onClick={() => setOpen(!open)}
         title="Notifications"
-        className="relative w-10 h-10 flex items-center justify-center bg-white border border-[#e8d5c4] rounded-full shadow-[0_2px_8px_rgba(69,19,44,0.08)] text-[#8a5a70] hover:text-[#45132c] hover:border-[#45132c]/30 transition-all duration-200"
+        className="pressable relative w-10 h-10 flex items-center justify-center bg-white border border-[#e8d5c4] rounded-full shadow-[0_2px_8px_rgba(69,19,44,0.08)] text-[#8a5a70] hover:text-[#45132c] hover:border-[#45132c]/30 hover:scale-105 transition-all duration-200"
       >
-        <Bell size={17} />
+        <Bell size={17} className={reminders.length > 0 ? 'animate-bellSwing origin-top' : ''} />
         {reminders.length > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-[#ed4a7e] text-white text-[10px] font-bold rounded-full">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-[#ed4a7e] text-white text-[10px] font-bold rounded-full animate-popIn">
             {reminders.length}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-12 w-80 bg-white border border-[#e8d5c4] rounded-xl shadow-[0_8px_24px_rgba(69,19,44,0.15)] overflow-hidden animate-fadeIn">
+        <div className="absolute right-0 top-12 w-80 bg-white border border-[#e8d5c4] rounded-xl shadow-[0_8px_24px_rgba(69,19,44,0.15)] overflow-hidden animate-scaleIn origin-top-right">
           <div className="px-4 py-3 border-b border-[#e8d5c4]">
             <h3 className="text-sm font-semibold text-[#45132c]">Notifications</h3>
           </div>

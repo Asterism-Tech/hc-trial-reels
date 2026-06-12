@@ -127,7 +127,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={handleAddTag}
                 disabled={adding}
-                className="flex items-center gap-1.5 px-3 py-2 bg-[#45132c] hover:bg-[#ed4a7e] text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
+                className="flex items-center gap-1.5 px-3 py-2 bg-[#45132c] hover:bg-[#ed4a7e] text-white text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] pressable hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
               >
                 <Plus size={14} />
                 Add

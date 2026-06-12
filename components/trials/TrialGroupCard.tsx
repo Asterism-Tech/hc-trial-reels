@@ -201,7 +201,7 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
   }, [])
 
   return (
-    <div className="bg-white border border-[#e8d5c4] rounded-xl overflow-hidden animate-fadeIn shadow-[0_2px_8px_rgba(69,19,44,0.06)] hover:shadow-[0_4px_16px_rgba(69,19,44,0.1)] transition-all duration-200">
+    <div className={`bg-white border border-[#e8d5c4] rounded-xl overflow-hidden animate-fadeIn shadow-[0_2px_8px_rgba(69,19,44,0.06)] transition-all duration-200 ${expanded ? 'shadow-[0_8px_24px_rgba(69,19,44,0.12)]' : 'hover-lift'}`}>
       {/* Card Header */}
       <div
         className="flex items-start justify-between p-4 cursor-pointer hover:bg-[#faf9f7] transition-colors"
@@ -259,7 +259,7 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
 
       {/* Expanded */}
       {expanded && (
-        <div className="border-t border-[#e8d5c4] p-4 space-y-6">
+        <div className="border-t border-[#e8d5c4] p-4 space-y-6 animate-slideUp">
           {/* Comparison table */}
           <div>
             <h4 className="text-xs font-semibold text-[#8a5a70] uppercase tracking-wider mb-3">Version Comparison</h4>
@@ -268,7 +268,7 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
 
           {/* Stat bars */}
           {versions.some((v) => v.views > 0) && (
-            <div>
+            <div className="animate-slideUp stagger-2">
               <h4 className="text-xs font-semibold text-[#8a5a70] uppercase tracking-wider mb-3">Performance</h4>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatBar versions={versions} stat="views" label="Views" />
@@ -281,13 +281,13 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
 
           {/* Per-version panels */}
           <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${Math.min(versions.length, 3)}, 1fr)` }}>
-            {versions.map((v) => {
+            {versions.map((v, vIdx) => {
               const color = versionColor(v.versionNumber)
               const isArchived = !v.isWinner && (group.status === 'won' || group.status === 'archived')
               return (
                 <div
                   key={v.id}
-                  className="rounded-xl p-4 border-2"
+                  className={`rounded-xl p-4 border-2 animate-slideUp stagger-${Math.min(vIdx + 2, 8)} transition-transform duration-200 hover:-translate-y-0.5`}
                   style={v.isWinner
                     ? { borderColor: WINNER_COLOR, backgroundColor: '#fdf2f6', boxShadow: '0 2px 12px rgba(237,74,126,0.15)' }
                     : { borderColor: isArchived ? '#e0d8dc' : color + '55', backgroundColor: isArchived ? '#f7f4f5' : '#faf9f7' }}
@@ -301,7 +301,7 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
                           ? { backgroundColor: WINNER_COLOR, color: '#ffffff' }
                           : { color: isArchived ? '#9b8a92' : color }}
                       >
-                        {v.isWinner && <Crown size={12} className="text-[#ffd966]" fill="#ffd966" />}
+                        {v.isWinner && <Crown size={12} className="text-[#ffd966] animate-crownTwinkle" fill="#ffd966" />}
                         V{v.versionNumber}
                       </span>
                       {v.isWinner && (
@@ -318,7 +318,7 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
                         <button
                           type="button"
                           onClick={() => handleMarkWinner(v.id)}
-                          className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs bg-white text-[#a07080] border border-[#e8d5c4] hover:text-[#ed4a7e] hover:border-[#ed4a7e]/50 transition-all duration-200"
+                          className="pressable flex items-center gap-1 px-2 py-1 rounded-lg text-xs bg-white text-[#a07080] border border-[#e8d5c4] hover:text-[#ed4a7e] hover:border-[#ed4a7e]/50 hover:scale-105 transition-all duration-200"
                           title="Mark as winner — publishes this version and archives the rest"
                         >
                           <Crown size={10} />

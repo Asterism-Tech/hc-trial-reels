@@ -77,18 +77,18 @@ export default function DashboardPage() {
             description="Add your first trial group on the Trials page"
             icon={<Film />}
             action={
-              <Link href="/trials" className="px-4 py-2 bg-[#45132c] text-white text-sm font-semibold rounded-lg hover:bg-[#ed4a7e] transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]">
+              <Link href="/trials" className="px-4 py-2 bg-[#45132c] text-white text-sm font-semibold rounded-lg hover:bg-[#ed4a7e] transition-all duration-200 hover:scale-[1.02] pressable hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]">
                 Go to Trials
               </Link>
             }
           />
         ) : (
           <div className="space-y-2">
-            {recent.map((g) => (
+            {recent.map((g, i) => (
               <Link
                 key={g.id}
                 href={`/trials/${g.id}`}
-                className="flex items-center justify-between bg-white border border-[#e8d5c4] rounded-xl px-4 py-3 hover:border-[#45132c]/30 hover:shadow-[0_4px_12px_rgba(69,19,44,0.08)] transition-all duration-200 group animate-fadeIn"
+                className={`flex items-center justify-between bg-white border border-[#e8d5c4] rounded-xl px-4 py-3 hover:border-[#45132c]/30 hover:shadow-[0_4px_12px_rgba(69,19,44,0.08)] hover:-translate-y-0.5 transition-all duration-200 group animate-slideUp stagger-${Math.min(i + 1, 8)}`}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="min-w-0">
@@ -108,7 +108,7 @@ export default function DashboardPage() {
                     <p className="text-xs text-[#a07080]">{formatDate(g.publishDate)}</p>
                     <p className="text-xs text-[#8a5a70]">{g.versions.length} version{g.versions.length !== 1 ? 's' : ''}</p>
                   </div>
-                  <ArrowRight size={14} className="text-[#dcc8b0] group-hover:text-[#45132c] transition-colors" />
+                  <ArrowRight size={14} className="text-[#dcc8b0] group-hover:text-[#45132c] group-hover:translate-x-1 transition-all duration-200" />
                 </div>
               </Link>
             ))}

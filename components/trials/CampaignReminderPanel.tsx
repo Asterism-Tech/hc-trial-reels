@@ -38,10 +38,10 @@ export default function CampaignReminderPanel({ groups, onGroupsChange }: Campai
     <div>
       <h2 className="text-base font-semibold text-[#45132c] mb-3">Campaign Data Needed</h2>
       <div className="space-y-2">
-        {reminders.map((r) => (
+        {reminders.map((r, i) => (
           <div
             key={r.group.id}
-            className="flex items-center justify-between gap-3 bg-white border-2 border-dashed border-[#ed4a7e]/40 rounded-xl px-4 py-3 animate-fadeIn"
+            className={`flex items-center justify-between gap-3 bg-white border-2 border-dashed border-[#ed4a7e]/40 rounded-xl px-4 py-3 animate-slideUp stagger-${Math.min(i + 1, 8)} hover-lift`}
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-8 h-8 shrink-0 flex items-center justify-center bg-[#ed4a7e]/10 rounded-full">
@@ -58,7 +58,7 @@ export default function CampaignReminderPanel({ groups, onGroupsChange }: Campai
               <button
                 type="button"
                 onClick={() => setFilling(r)}
-                className="px-3 py-1.5 bg-[#ed4a7e] hover:bg-[#45132c] text-white text-xs font-semibold rounded-lg transition-all duration-200"
+                className="pressable px-3 py-1.5 bg-[#ed4a7e] hover:bg-[#45132c] text-white text-xs font-semibold rounded-lg transition-all duration-200 hover:scale-105"
               >
                 Fill in data
               </button>

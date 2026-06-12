@@ -125,7 +125,7 @@ export default function ExportPage() {
               key={d}
               type="button"
               onClick={() => { setStartDate(daysAgo(d)); setEndDate(daysAgo(0)) }}
-              className="px-3 py-2 rounded-lg text-xs border border-[#e8d5c4] text-[#8a5a70] hover:border-[#45132c] hover:text-[#45132c] transition-all"
+              className="pressable px-3 py-2 rounded-lg text-xs border border-[#e8d5c4] text-[#8a5a70] hover:border-[#45132c] hover:text-[#45132c] transition-all"
             >
               Last {label}
             </button>
@@ -214,7 +214,7 @@ export default function ExportPage() {
           type="button"
           onClick={() => handleExport('excel')}
           disabled={exporting !== null || selectedGroups.length === 0}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#45132c] hover:bg-[#ed4a7e] text-white text-sm font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#45132c] hover:bg-[#ed4a7e] text-white text-sm font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] pressable hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
         >
           <FileSpreadsheet size={16} />
           {exporting === 'excel' ? 'Exporting...' : 'Export Excel'}
@@ -223,7 +223,7 @@ export default function ExportPage() {
           type="button"
           onClick={() => handleExport('pdf')}
           disabled={exporting !== null || selectedGroups.length === 0}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#ed4a7e] hover:bg-[#45132c] text-white text-sm font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(69,19,44,0.2)]"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#ed4a7e] hover:bg-[#45132c] text-white text-sm font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 hover:scale-[1.02] pressable hover:shadow-[0_4px_12px_rgba(69,19,44,0.2)]"
         >
           <FileText size={16} />
           {exporting === 'pdf' ? 'Exporting...' : 'Export PDF'}

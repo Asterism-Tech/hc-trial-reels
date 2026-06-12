@@ -22,9 +22,9 @@ export default function VersionChip({ version, groupStatus, onClick, active }: V
       <button
         type="button"
         onClick={onClick}
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#ed4a7e] text-white border border-[#ed4a7e] shadow-[0_2px_8px_rgba(237,74,126,0.35)] transition-all ${onClick ? 'hover:bg-[#d63a6c] cursor-pointer' : 'cursor-default'}`}
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#ed4a7e] text-white border border-[#ed4a7e] shadow-[0_2px_8px_rgba(237,74,126,0.35)] transition-all duration-200 hover:scale-105 hover:shadow-[0_4px_12px_rgba(237,74,126,0.45)] ${onClick ? 'hover:bg-[#d63a6c] cursor-pointer' : 'cursor-default'}`}
       >
-        <Crown size={11} className="text-[#ffd966]" fill="#ffd966" />
+        <Crown size={11} className="text-[#ffd966] animate-crownTwinkle" fill="#ffd966" />
         <span>V{version.versionNumber}</span>
         <span className="text-[10px] font-medium text-white/90">
           {hasStats ? formatNumber(version.views) : 'Winner'}
@@ -54,7 +54,7 @@ export default function VersionChip({ version, groupStatus, onClick, active }: V
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all ${onClick ? 'hover:opacity-80 cursor-pointer' : 'cursor-default'} ${active ? 'ring-2 ring-offset-1' : ''}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all duration-200 hover:scale-105 ${onClick ? 'hover:opacity-80 cursor-pointer' : 'cursor-default'} ${active ? 'ring-2 ring-offset-1' : ''}`}
       style={{
         borderColor: color,
         color,

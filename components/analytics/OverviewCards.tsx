@@ -2,6 +2,7 @@
 
 import { TrialGroup } from '@/lib/types'
 import { formatNumber } from '@/lib/utils'
+import CountUp from '@/components/ui/CountUp'
 
 interface OverviewCardsProps {
   groups: TrialGroup[]
@@ -38,12 +39,12 @@ export default function OverviewCards({ groups }: OverviewCardsProps) {
     if (avg > bestThemeAvg) { bestThemeAvg = avg; bestTheme = theme }
   }
 
-  const cards = [
-    { label: 'Total Trial Groups', value: String(total), sub: `${won} published` },
-    { label: 'Live Trials', value: String(live), sub: live === 1 ? 'awaiting a winner' : 'awaiting winners' },
+  const cards: { label: string; value: React.ReactNode; sub: string }[] = [
+    { label: 'Total Trial Groups', value: <CountUp value={total} />, sub: `${won} published` },
+    { label: 'Live Trials', value: <CountUp value={live} />, sub: live === 1 ? 'awaiting a winner' : 'awaiting winners' },
     {
       label: 'Avg Views',
-      value: formatNumber(avgWinnerViews),
+      value: <CountUp value={avgWinnerViews} format={(n) => formatNumber(Math.round(n))} />,
       sub: `Winners vs ${formatNumber(avgNonWinnerViews)} non-winners`,
     },
     { label: 'Best Theme', value: bestTheme === '—' ? '—' : bestTheme.split('/')[0], sub: bestTheme === '—' ? 'No data yet' : `${formatNumber(bestThemeAvg)} avg winner views` },
@@ -51,8 +52,11 @@ export default function OverviewCards({ groups }: OverviewCardsProps) {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map((c) => (
-        <div key={c.label} className="bg-white border border-[#e8d5c4] rounded-xl p-4 animate-fadeIn shadow-[0_2px_8px_rgba(69,19,44,0.06)]">
+      {cards.map((c, i) => (
+        <div
+          key={c.label}
+          className={`bg-white border border-[#e8d5c4] rounded-xl p-4 animate-slideUp stagger-${i + 1} hover-lift shadow-[0_2px_8px_rgba(69,19,44,0.06)]`}
+        >
           <p className="text-xs text-[#8a5a70] mb-1">{c.label}</p>
           <p className="text-2xl font-bold text-[#45132c] mb-0.5">{c.value}</p>
           <p className="text-xs text-[#a07080]">{c.sub}</p>

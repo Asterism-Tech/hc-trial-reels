@@ -62,7 +62,7 @@ export default function TrialsPage() {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#45132c] hover:bg-[#ed4a7e] text-white text-sm font-semibold rounded-xl transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
+          className="flex items-center gap-2 px-4 py-2 bg-[#45132c] hover:bg-[#ed4a7e] text-white text-sm font-semibold rounded-xl transition-all duration-200 hover:scale-[1.02] pressable hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
         >
           <Plus size={16} />
           New Trial Group
@@ -77,10 +77,10 @@ export default function TrialsPage() {
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+              className={`pressable px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeTab === tab.value
-                  ? 'bg-[#45132c] text-white'
-                  : 'text-[#8a5a70] hover:text-[#45132c]'
+                  ? 'bg-[#45132c] text-white shadow-[0_2px_8px_rgba(69,19,44,0.25)]'
+                  : 'text-[#8a5a70] hover:text-[#45132c] hover:bg-[#f5eee4]'
               }`}
             >
               {tab.label}
@@ -107,7 +107,7 @@ export default function TrialsPage() {
             activeTab === 'all' || activeTab === 'live' ? (
               <button
                 onClick={() => setShowModal(true)}
-                className="px-4 py-2 bg-[#45132c] text-white text-sm font-semibold rounded-xl hover:bg-[#ed4a7e] transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
+                className="px-4 py-2 bg-[#45132c] text-white text-sm font-semibold rounded-xl hover:bg-[#ed4a7e] transition-all duration-200 hover:scale-[1.02] pressable hover:shadow-[0_4px_12px_rgba(237,74,126,0.2)]"
               >
                 Add Trial Group
               </button>
@@ -116,8 +116,10 @@ export default function TrialsPage() {
         />
       ) : (
         <div className="space-y-3">
-          {filtered.map((g) => (
-            <TrialGroupCard key={g.id} group={g} onUpdate={handleUpdate} onDelete={handleDelete} />
+          {filtered.map((g, i) => (
+            <div key={g.id} className={`animate-slideUp stagger-${Math.min(i + 1, 8)}`}>
+              <TrialGroupCard group={g} onUpdate={handleUpdate} onDelete={handleDelete} />
+            </div>
           ))}
         </div>
       )}

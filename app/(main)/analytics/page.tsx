@@ -27,7 +27,7 @@ const DATE_RANGES = [
 
 function SectionCard({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white border border-[#e8d5c4] rounded-xl p-5 animate-fadeIn shadow-[0_2px_8px_rgba(69,19,44,0.06)]">
+    <div className="bg-white border border-[#e8d5c4] rounded-xl p-5 animate-slideUp hover-lift shadow-[0_2px_8px_rgba(69,19,44,0.06)]">
       <div className="mb-4">
         <h3 className="text-sm font-semibold text-[#45132c]">{title}</h3>
         <p className="text-xs text-[#a07080] mt-0.5">{subtitle}</p>
