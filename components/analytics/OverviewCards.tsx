@@ -10,7 +10,7 @@ interface OverviewCardsProps {
 export default function OverviewCards({ groups }: OverviewCardsProps) {
   const total = groups.length
   const won = groups.filter((g) => g.status === 'won').length
-  const winRate = total > 0 ? Math.round((won / total) * 100) : 0
+  const live = groups.filter((g) => g.status === 'live').length
 
   const allVersions = groups.flatMap((g) => g.versions)
   const winnerVersions = allVersions.filter((v) => v.isWinner)
@@ -39,8 +39,8 @@ export default function OverviewCards({ groups }: OverviewCardsProps) {
   }
 
   const cards = [
-    { label: 'Total Trial Groups', value: String(total), sub: `${won} completed` },
-    { label: 'Win Rate', value: `${winRate}%`, sub: `${won} of ${total} groups` },
+    { label: 'Total Trial Groups', value: String(total), sub: `${won} published` },
+    { label: 'Live Trials', value: String(live), sub: live === 1 ? 'awaiting a winner' : 'awaiting winners' },
     {
       label: 'Avg Views',
       value: formatNumber(avgWinnerViews),

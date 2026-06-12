@@ -16,7 +16,7 @@ import { Film } from 'lucide-react'
 const TABS: { label: string; value: TrialStatus | 'all' }[] = [
   { label: 'All', value: 'all' },
   { label: 'Live', value: 'live' },
-  { label: 'Winning', value: 'won' },
+  { label: 'Published', value: 'won' },
   { label: 'Archived', value: 'archived' },
 ]
 
@@ -41,10 +41,14 @@ export default function TrialsPage() {
     setGroups((prev) => prev.map((g) => g.id === updated.id ? updated : g))
   }
 
+  const handleDelete = (groupId: string) => {
+    setGroups((prev) => prev.filter((g) => g.id !== groupId))
+  }
+
   const EMPTY_MESSAGES: Record<string, string> = {
     all: 'No trial groups yet — create your first one!',
     live: 'No live trials — add a new trial group above',
-    won: 'No winning trials yet — keep testing!',
+    won: 'No published winners yet — keep testing!',
     archived: 'No archived trials',
   }
 
@@ -113,7 +117,7 @@ export default function TrialsPage() {
       ) : (
         <div className="space-y-3">
           {filtered.map((g) => (
-            <TrialGroupCard key={g.id} group={g} onUpdate={handleUpdate} />
+            <TrialGroupCard key={g.id} group={g} onUpdate={handleUpdate} onDelete={handleDelete} />
           ))}
         </div>
       )}

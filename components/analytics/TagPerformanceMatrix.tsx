@@ -22,15 +22,16 @@ function getColor(val: number, min: number, max: number): string {
 }
 
 export default function TagPerformanceMatrix({ groups }: Props) {
+  // Compare versions against each other via their version tags: a tag "wins"
+  // when a version carrying it is marked the winner of its trial.
   const tagStats: Record<string, { views: number[]; completion: number[]; wins: number; total: number }> = {}
 
   for (const g of groups) {
-    const hasWinner = g.versions.some((v) => v.isWinner)
-    for (const tag of g.tags) {
-      if (!tagStats[tag]) tagStats[tag] = { views: [], completion: [], wins: 0, total: 0 }
-      tagStats[tag].total++
-      if (hasWinner) tagStats[tag].wins++
-      for (const v of g.versions) {
+    for (const v of g.versions) {
+      for (const tag of v.tags) {
+        if (!tagStats[tag]) tagStats[tag] = { views: [], completion: [], wins: 0, total: 0 }
+        tagStats[tag].total++
+        if (v.isWinner) tagStats[tag].wins++
         if (v.views > 0) tagStats[tag].views.push(v.views)
         if (v.completionRatePct > 0) tagStats[tag].completion.push(v.completionRatePct)
       }
@@ -48,7 +49,7 @@ export default function TagPerformanceMatrix({ groups }: Props) {
   })).sort((a, b) => b.winRate - a.winRate)
 
   if (rows.length === 0) return (
-    <div className="flex items-center justify-center h-32 text-[#a07080] text-sm">No tagged trials yet</div>
+    <div className="flex items-center justify-center h-32 text-[#a07080] text-sm">No tagged versions yet — add version tags when creating or editing a reel</div>
   )
 
   const allViews = rows.map((r) => r.avgViews)
@@ -67,7 +68,7 @@ export default function TagPerformanceMatrix({ groups }: Props) {
             <th className="text-right text-xs text-[#a07080] font-medium py-2 px-3">Avg Views</th>
             <th className="text-right text-xs text-[#a07080] font-medium py-2 px-3">Avg Completion</th>
             <th className="text-right text-xs text-[#a07080] font-medium py-2 px-3">Win Rate</th>
-            <th className="text-right text-xs text-[#a07080] font-medium py-2 pl-3">Trials</th>
+            <th className="text-right text-xs text-[#a07080] font-medium py-2 pl-3">Versions</th>
           </tr>
         </thead>
         <tbody>

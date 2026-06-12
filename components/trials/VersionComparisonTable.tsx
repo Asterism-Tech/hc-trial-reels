@@ -2,6 +2,8 @@
 
 import { Version } from '@/lib/types'
 import { formatNumber } from '@/lib/utils'
+import { versionColor, WINNER_COLOR } from '@/lib/version-colors'
+import { Crown } from 'lucide-react'
 
 interface VersionComparisonTableProps {
   versions: Version[]
@@ -14,6 +16,7 @@ type RowDef = {
 }
 
 const rows: RowDef[] = [
+  { label: 'Version Tags', key: 'tags', format: (v) => (Array.isArray(v) ? (v as string[]).join(', ') || '—' : String(v || '—')) },
   { label: 'Hook Type', key: 'hookType' },
   { label: 'Hook Text', key: 'hookText' },
   { label: 'Differences', key: 'differences' },
@@ -60,9 +63,15 @@ export default function VersionComparisonTable({ versions }: VersionComparisonTa
           <tr className="border-b border-[#e8d5c4]">
             <th className="text-left text-xs text-[#a07080] font-medium py-2 pr-4 w-36">Field</th>
             {versions.map((v) => (
-              <th key={v.id} className="text-left text-xs font-medium py-2 px-2 min-w-[140px]">
-                <span className={`${v.isWinner ? 'text-[#b87d00]' : 'text-[#8a5a70]'}`}>
-                  V{v.versionNumber} {v.isWinner ? '👑' : ''}
+              <th key={v.id} className="text-left text-xs font-semibold py-2 px-2 min-w-[140px]">
+                <span
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md"
+                  style={v.isWinner
+                    ? { backgroundColor: WINNER_COLOR, color: '#ffffff' }
+                    : { backgroundColor: versionColor(v.versionNumber) + '14', color: versionColor(v.versionNumber) }}
+                >
+                  {v.isWinner && <Crown size={10} className="text-[#ffd966]" fill="#ffd966" />}
+                  V{v.versionNumber}{v.isWinner ? ' · Winner' : ''}
                 </span>
               </th>
             ))}

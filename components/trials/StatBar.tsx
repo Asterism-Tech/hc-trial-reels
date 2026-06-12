@@ -11,6 +11,7 @@ import {
 } from 'recharts'
 import { Version } from '@/lib/types'
 import { formatNumber } from '@/lib/utils'
+import { versionChartColor } from '@/lib/version-colors'
 
 interface StatBarProps {
   versions: Version[]
@@ -23,7 +24,7 @@ export default function StatBar({ versions, stat, label, unit = '' }: StatBarPro
   const data = versions.map((v) => ({
     name: `V${v.versionNumber}`,
     value: v[stat] as number,
-    isWinner: v.isWinner,
+    color: versionChartColor(v.versionNumber, v.isWinner),
   }))
 
   return (
@@ -40,7 +41,7 @@ export default function StatBar({ versions, stat, label, unit = '' }: StatBarPro
           />
           <Bar dataKey="value" radius={[3, 3, 0, 0]}>
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.isWinner ? '#F5B942' : '#45132c'} />
+              <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Bar>
         </BarChart>

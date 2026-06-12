@@ -7,6 +7,7 @@ import {
   Film,
   BarChart2,
   Sparkles,
+  Download,
   Settings,
 } from 'lucide-react'
 
@@ -15,6 +16,7 @@ const navItems = [
   { href: '/trials', label: 'Trials', icon: Film },
   { href: '/analytics', label: 'Analytics', icon: BarChart2 },
   { href: '/ai', label: 'AI Insights', icon: Sparkles },
+  { href: '/export', label: 'Export', icon: Download },
   { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
@@ -43,7 +45,7 @@ export default function Sidebar() {
               title={label}
               className={`flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
                 active
-                  ? 'bg-[#45132c]/10 text-[#45132c]'
+                  ? 'bg-[#f5a3c7]/40 text-[#45132c]'
                   : 'text-[#8a5a70] hover:text-[#45132c] hover:bg-[#f5eee4]'
               }`}
             >

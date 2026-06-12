@@ -1,37 +1,72 @@
-import { Version } from '@/lib/types'
-import { Crown } from 'lucide-react'
+import { Version, TrialStatus } from '@/lib/types'
+import { Crown, Archive } from 'lucide-react'
 import { formatNumber } from '@/lib/utils'
+import { versionColor, ARCHIVED_COLOR } from '@/lib/version-colors'
 
 interface VersionChipProps {
   version: Version
+  groupStatus?: TrialStatus
   onClick?: () => void
   active?: boolean
 }
 
-export default function VersionChip({ version, onClick, active }: VersionChipProps) {
+export default function VersionChip({ version, groupStatus, onClick, active }: VersionChipProps) {
   const isWinner = version.isWinner
-  const isPublished = version.isPublished
+  // Once a trial has a winner, the winner is the published reel and the rest are archived
+  const isArchived = !isWinner && (groupStatus === 'won' || groupStatus === 'archived')
   const hasStats = version.views > 0
+  const color = versionColor(version.versionNumber)
 
-  let chipClass = 'border-[#e8d5c4] bg-[#f0e6d3] text-[#8a5a70]'
-  if (isWinner) chipClass = 'border-[#F5B942]/50 bg-[#F5B942]/20 text-[#b87d00]'
-  else if (isPublished) chipClass = 'border-[#45132c]/30 bg-[#45132c]/10 text-[#45132c]'
-  else if (active) chipClass = 'border-[#45132c]/30 bg-[#45132c]/5 text-[#45132c]'
+  if (isWinner) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#ed4a7e] text-white border border-[#ed4a7e] shadow-[0_2px_8px_rgba(237,74,126,0.35)] transition-all ${onClick ? 'hover:bg-[#d63a6c] cursor-pointer' : 'cursor-default'}`}
+      >
+        <Crown size={11} className="text-[#ffd966]" fill="#ffd966" />
+        <span>V{version.versionNumber}</span>
+        <span className="text-[10px] font-medium text-white/90">
+          {hasStats ? formatNumber(version.views) : 'Winner'}
+        </span>
+        <span className="text-[9px] uppercase tracking-wide bg-white/20 rounded px-1 py-px">Published</span>
+      </button>
+    )
+  }
+
+  if (isArchived) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-dashed text-xs font-medium transition-all ${onClick ? 'hover:opacity-80 cursor-pointer' : 'cursor-default'}`}
+        style={{ borderColor: ARCHIVED_COLOR, color: ARCHIVED_COLOR, backgroundColor: '#f4f1f2' }}
+      >
+        <Archive size={10} />
+        <span>V{version.versionNumber}</span>
+        {hasStats && <span className="text-[10px] opacity-70">{formatNumber(version.views)}</span>}
+        <span className="text-[9px] uppercase tracking-wide opacity-70">Archived</span>
+      </button>
+    )
+  }
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium transition-all ${chipClass} ${onClick ? 'hover:opacity-80 cursor-pointer' : 'cursor-default'}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all ${onClick ? 'hover:opacity-80 cursor-pointer' : 'cursor-default'} ${active ? 'ring-2 ring-offset-1' : ''}`}
+      style={{
+        borderColor: color,
+        color,
+        backgroundColor: color + '14',
+        ...(active ? { ['--tw-ring-color' as string]: color } : {}),
+      }}
     >
-      {isWinner && <Crown size={10} className="text-[#b87d00]" />}
       <span>V{version.versionNumber}</span>
-      {hasStats && (
-        <span className="text-[10px] opacity-70">{formatNumber(version.views)}</span>
-      )}
-      {!hasStats && <span className="text-[10px] opacity-40">—</span>}
-      {isPublished && !isWinner && (
-        <span className="text-[10px] opacity-60">Published</span>
+      {hasStats ? (
+        <span className="text-[10px] opacity-80">{formatNumber(version.views)}</span>
+      ) : (
+        <span className="text-[10px] opacity-40">—</span>
       )}
     </button>
   )

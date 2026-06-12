@@ -13,9 +13,10 @@ create table trial_groups (
   test_type text,
   content_theme text[],
   upload_date date,
-  publish_date date,
-  tags text[],
+  publish_date date, -- set when a winner is marked (winner = published reel)
+  tags text[], -- global tags: apply to every version in the group
   notes text,
+  data_reminder_dismissed boolean default false,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -39,6 +40,8 @@ create table versions (
   caption text,
   cta_used text[],
   target_age_group text,
+  tags text[] default '{}', -- version tags: used to compare versions against each other
+
   views integer default 0,
   accounts_reached integer default 0,
   likes integer default 0,

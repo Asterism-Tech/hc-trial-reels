@@ -5,10 +5,9 @@ import {
 } from 'recharts'
 import { TrialGroup } from '@/lib/types'
 import { formatNumber } from '@/lib/utils'
+import { VERSION_COLORS, WINNER_COLOR } from '@/lib/version-colors'
 
 interface Props { groups: TrialGroup[] }
-
-const COLORS = ['#45132c', '#6b2e4d', '#9a4d70', '#ed4a7e', '#f5a3c7']
 
 export default function ViewsByVersionChart({ groups }: Props) {
   const data = groups
@@ -52,7 +51,7 @@ export default function ViewsByVersionChart({ groups }: Props) {
             {data.map((entry, idx) => (
               <Cell
                 key={`cell-${idx}`}
-                fill={entry[`${key}_winner`] ? '#F5B942' : COLORS[i % COLORS.length]}
+                fill={entry[`${key}_winner`] ? WINNER_COLOR : VERSION_COLORS[i % VERSION_COLORS.length]}
               />
             ))}
           </Bar>

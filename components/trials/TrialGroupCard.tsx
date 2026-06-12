@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import { ChevronDown, ChevronUp, Crown, Eye, EyeOff } from 'lucide-react'
+import { ChevronDown, ChevronUp, Crown, Pencil, Trash2, Archive } from 'lucide-react'
 import { TrialGroup, Version } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
@@ -9,11 +9,16 @@ import Badge, { statusBadgeVariant } from '@/components/ui/Badge'
 import VersionChip from './VersionChip'
 import VersionComparisonTable from './VersionComparisonTable'
 import StatBar from './StatBar'
+import EditTrialGroupModal from './EditTrialGroupModal'
+import EditVersionModal from './EditVersionModal'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { formatDate, isSafeImageUrl } from '@/lib/utils'
+import { versionColor, WINNER_COLOR } from '@/lib/version-colors'
 
 interface TrialGroupCardProps {
   group: TrialGroup
   onUpdate: (updated: TrialGroup) => void
+  onDelete?: (groupId: string) => void
   defaultExpanded?: boolean
 }
 
@@ -79,9 +84,14 @@ function InlineStatEdit({
   )
 }
 
-export default function TrialGroupCard({ group, onUpdate, defaultExpanded = false }: TrialGroupCardProps) {
+export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpanded = false }: TrialGroupCardProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const [versions, setVersions] = useState<Version[]>(group.versions)
+  const [editingGroup, setEditingGroup] = useState(false)
+  const [deletingGroup, setDeletingGroup] = useState(false)
+  const [editingVersion, setEditingVersion] = useState<Version | null>(null)
+  const [deletingVersion, setDeletingVersion] = useState<Version | null>(null)
+  const [busy, setBusy] = useState(false)
   const debounceRefs = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
   const handleStatSave = useCallback((versionId: string, snakeField: string, value: number) => {
@@ -104,24 +114,80 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
     }, 800)
   }, [])
 
-  const handleSetWinner = async (versionId: string) => {
-    const updates = versions.map((v) => ({
-      id: v.id,
-      is_winner: v.id === versionId,
-    }))
-    for (const u of updates) {
-      await supabase.from('versions').update({ is_winner: u.is_winner }).eq('id', u.id)
+  // Winner = published reel. One action: the winner is published (publish date
+  // set today if missing) and every other version is archived with the group
+  // marked as won.
+  const handleMarkWinner = async (versionId: string) => {
+    const publishDate = group.publishDate || new Date().toISOString().slice(0, 10)
+
+    for (const v of versions) {
+      await supabase
+        .from('versions')
+        .update({ is_winner: v.id === versionId, is_published: v.id === versionId })
+        .eq('id', v.id)
     }
-    await supabase.from('trial_groups').update({ status: 'won', updated_at: new Date().toISOString() }).eq('id', group.id)
-    setVersions((prev) => prev.map((v) => ({ ...v, isWinner: v.id === versionId })))
-    onUpdate({ ...group, status: 'won', versions: versions.map((v) => ({ ...v, isWinner: v.id === versionId })) })
-    toast.success('Winner marked! 👑')
+    await supabase
+      .from('trial_groups')
+      .update({ status: 'won', publish_date: publishDate, updated_at: new Date().toISOString() })
+      .eq('id', group.id)
+
+    const updatedVersions = versions.map((v) => ({
+      ...v,
+      isWinner: v.id === versionId,
+      isPublished: v.id === versionId,
+    }))
+    setVersions(updatedVersions)
+    onUpdate({ ...group, status: 'won', publishDate, versions: updatedVersions })
+    toast.success('Winner published — other versions archived 👑')
   }
 
-  const handleTogglePublished = async (versionId: string, current: boolean) => {
-    await supabase.from('versions').update({ is_published: !current }).eq('id', versionId)
-    setVersions((prev) => prev.map((v) => v.id === versionId ? { ...v, isPublished: !current } : v))
-    toast.success(!current ? 'Marked as published' : 'Unpublished')
+  const handleDeleteGroup = async () => {
+    setBusy(true)
+    const { error } = await supabase.from('trial_groups').delete().eq('id', group.id)
+    setBusy(false)
+    if (error) { toast.error('Failed to delete reel group'); return }
+    toast.success('Reel group deleted')
+    setDeletingGroup(false)
+    onDelete?.(group.id)
+  }
+
+  const handleDeleteVersion = async () => {
+    if (!deletingVersion) return
+    setBusy(true)
+    const { error } = await supabase.from('versions').delete().eq('id', deletingVersion.id)
+    if (error) { setBusy(false); toast.error('Failed to delete version'); return }
+
+    const remaining = versions.filter((v) => v.id !== deletingVersion.id)
+    await supabase
+      .from('versions')
+      .update({ total_versions: remaining.length })
+      .eq('trial_group_id', group.id)
+
+    // If the published winner was deleted, the trial goes back to live
+    let status = group.status
+    let publishDate = group.publishDate
+    if (deletingVersion.isWinner && group.status === 'won') {
+      status = 'live'
+      publishDate = ''
+      await supabase
+        .from('trial_groups')
+        .update({ status: 'live', publish_date: null, updated_at: new Date().toISOString() })
+        .eq('id', group.id)
+    }
+
+    setBusy(false)
+    const updated = remaining.map((v) => ({ ...v, totalVersions: remaining.length }))
+    setVersions(updated)
+    setDeletingVersion(null)
+    onUpdate({ ...group, status, publishDate, versions: updated })
+    toast.success(`V${deletingVersion.versionNumber} deleted`)
+  }
+
+  const handleVersionSaved = (updated: Version) => {
+    const next = versions.map((v) => (v.id === updated.id ? updated : v))
+    setVersions(next)
+    setEditingVersion(null)
+    onUpdate({ ...group, versions: next })
   }
 
   const handleTeamCommentSave = useCallback((versionId: string, comment: string) => {
@@ -145,7 +211,7 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
           <div className="flex items-center gap-2 flex-wrap mb-2">
             <h3 className="font-semibold text-[#45132c] text-sm truncate">{group.name}</h3>
             <Badge variant={statusBadgeVariant(group.status)}>
-              {group.status.charAt(0).toUpperCase() + group.status.slice(1)}
+              {group.status === 'won' ? 'Published' : group.status.charAt(0).toUpperCase() + group.status.slice(1)}
             </Badge>
             {group.testType && (
               <span className="text-xs px-2 py-0.5 bg-[#f0e6d3] text-[#8a5a70] rounded-full">{group.testType}</span>
@@ -160,7 +226,7 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
           )}
           <div className="flex flex-wrap gap-1.5">
             {versions.map((v) => (
-              <VersionChip key={v.id} version={v} />
+              <VersionChip key={v.id} version={v} groupStatus={group.status} />
             ))}
           </div>
         </div>
@@ -168,6 +234,24 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
           <div className="text-right hidden sm:block">
             <p className="text-xs text-[#a07080]">Published</p>
             <p className="text-xs text-[#8a5a70]">{formatDate(group.publishDate)}</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              title="Edit reel group"
+              onClick={(e) => { e.stopPropagation(); setEditingGroup(true) }}
+              className="p-1.5 text-[#b09090] hover:text-[#45132c] hover:bg-[#f5eee4] rounded-lg transition-all"
+            >
+              <Pencil size={14} />
+            </button>
+            <button
+              type="button"
+              title="Delete reel group"
+              onClick={(e) => { e.stopPropagation(); setDeletingGroup(true) }}
+              className="p-1.5 text-[#b09090] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+            >
+              <Trash2 size={14} />
+            </button>
           </div>
           {expanded ? <ChevronUp size={16} className="text-[#a07080]" /> : <ChevronDown size={16} className="text-[#a07080]" />}
         </div>
@@ -197,81 +281,162 @@ export default function TrialGroupCard({ group, onUpdate, defaultExpanded = fals
 
           {/* Per-version panels */}
           <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${Math.min(versions.length, 3)}, 1fr)` }}>
-            {versions.map((v) => (
-              <div key={v.id} className={`bg-[#faf9f7] rounded-xl p-4 border ${v.isWinner ? 'border-[#F5B942]/50' : 'border-[#e8d5c4]'}`}>
-                {/* Version header */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm font-bold ${v.isWinner ? 'text-[#b87d00]' : 'text-[#45132c]'}`}>
-                      V{v.versionNumber} {v.isWinner ? '👑' : ''}
-                    </span>
-                  </div>
-                  <div className="flex gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => handleSetWinner(v.id)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
-                        v.isWinner
-                          ? 'bg-[#F5B942]/20 text-[#b87d00] border border-[#F5B942]/40'
-                          : 'bg-white text-[#a07080] border border-[#e8d5c4] hover:text-[#b87d00] hover:border-[#F5B942]/40'
-                      }`}
-                      title={v.isWinner ? 'Winner' : 'Mark as winner'}
-                    >
-                      <Crown size={10} />
-                      <span>{v.isWinner ? 'Winner' : 'Mark'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleTogglePublished(v.id, v.isPublished)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
-                        v.isPublished
-                          ? 'bg-[#45132c]/10 text-[#45132c] border border-[#45132c]/20'
-                          : 'bg-white text-[#a07080] border border-[#e8d5c4] hover:text-[#45132c]'
-                      }`}
-                    >
-                      {v.isPublished ? <Eye size={10} /> : <EyeOff size={10} />}
-                      <span>{v.isPublished ? 'Published' : 'Publish'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Thumbnail */}
-                {v.thumbnailUrl && isSafeImageUrl(v.thumbnailUrl) && (
-                  <img
-                    src={v.thumbnailUrl}
-                    alt={`V${v.versionNumber} thumbnail`}
-                    className="w-full h-24 object-cover rounded-lg mb-3"
-                  />
-                )}
-
-                {/* Stats grid — editable */}
-                <div className="space-y-1.5 mb-3">
-                  {STAT_FIELDS.map((sf) => (
-                    <div key={sf.key} className="flex items-center justify-between">
-                      <span className="text-[10px] text-[#a07080]">{sf.label}</span>
-                      <InlineStatEdit
-                        version={v}
-                        field={sf.key}
-                        label={sf.label}
-                        onSave={handleStatSave}
-                      />
+            {versions.map((v) => {
+              const color = versionColor(v.versionNumber)
+              const isArchived = !v.isWinner && (group.status === 'won' || group.status === 'archived')
+              return (
+                <div
+                  key={v.id}
+                  className="rounded-xl p-4 border-2"
+                  style={v.isWinner
+                    ? { borderColor: WINNER_COLOR, backgroundColor: '#fdf2f6', boxShadow: '0 2px 12px rgba(237,74,126,0.15)' }
+                    : { borderColor: isArchived ? '#e0d8dc' : color + '55', backgroundColor: isArchived ? '#f7f4f5' : '#faf9f7' }}
+                >
+                  {/* Version header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="inline-flex items-center gap-1 text-sm font-bold px-2 py-0.5 rounded-md"
+                        style={v.isWinner
+                          ? { backgroundColor: WINNER_COLOR, color: '#ffffff' }
+                          : { color: isArchived ? '#9b8a92' : color }}
+                      >
+                        {v.isWinner && <Crown size={12} className="text-[#ffd966]" fill="#ffd966" />}
+                        V{v.versionNumber}
+                      </span>
+                      {v.isWinner && (
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-[#ed4a7e]">Winner · Published</span>
+                      )}
+                      {isArchived && (
+                        <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide text-[#9b8a92]">
+                          <Archive size={10} /> Archived
+                        </span>
+                      )}
                     </div>
-                  ))}
-                </div>
+                    <div className="flex gap-1">
+                      {!v.isWinner && (
+                        <button
+                          type="button"
+                          onClick={() => handleMarkWinner(v.id)}
+                          className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs bg-white text-[#a07080] border border-[#e8d5c4] hover:text-[#ed4a7e] hover:border-[#ed4a7e]/50 transition-all duration-200"
+                          title="Mark as winner — publishes this version and archives the rest"
+                        >
+                          <Crown size={10} />
+                          <span>Mark Winner</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setEditingVersion(v)}
+                        title="Edit version"
+                        className="p-1.5 text-[#b09090] hover:text-[#45132c] bg-white border border-[#e8d5c4] rounded-lg transition-all"
+                      >
+                        <Pencil size={11} />
+                      </button>
+                      {versions.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setDeletingVersion(v)}
+                          title="Delete version"
+                          className="p-1.5 text-[#b09090] hover:text-red-500 bg-white border border-[#e8d5c4] rounded-lg transition-all"
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
 
-                {/* Team comments */}
-                <div>
-                  <p className="text-[10px] text-[#a07080] mb-1">Team Comments</p>
-                  <TeamCommentArea
-                    versionId={v.id}
-                    initial={v.teamComments}
-                    onSave={handleTeamCommentSave}
-                  />
+                  {/* Version tags */}
+                  {v.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {v.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                          style={{ backgroundColor: color + '14', color: v.isWinner ? '#c02860' : color }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Thumbnail */}
+                  {v.thumbnailUrl && isSafeImageUrl(v.thumbnailUrl) && (
+                    <img
+                      src={v.thumbnailUrl}
+                      alt={`V${v.versionNumber} thumbnail`}
+                      className="w-full h-24 object-cover rounded-lg mb-3"
+                    />
+                  )}
+
+                  {/* Stats grid — editable */}
+                  <div className="space-y-1.5 mb-3">
+                    {STAT_FIELDS.map((sf) => (
+                      <div key={sf.key} className="flex items-center justify-between">
+                        <span className="text-[10px] text-[#a07080]">{sf.label}</span>
+                        <InlineStatEdit
+                          version={v}
+                          field={sf.key}
+                          label={sf.label}
+                          onSave={handleStatSave}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Team comments */}
+                  <div>
+                    <p className="text-[10px] text-[#a07080] mb-1">Team Comments</p>
+                    <TeamCommentArea
+                      versionId={v.id}
+                      initial={v.teamComments}
+                      onSave={handleTeamCommentSave}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
+      )}
+
+      {editingGroup && (
+        <EditTrialGroupModal
+          group={{ ...group, versions }}
+          onClose={() => setEditingGroup(false)}
+          onSaved={(updated) => { setEditingGroup(false); onUpdate(updated) }}
+        />
+      )}
+
+      {editingVersion && (
+        <EditVersionModal
+          version={editingVersion}
+          onClose={() => setEditingVersion(null)}
+          onSaved={handleVersionSaved}
+        />
+      )}
+
+      {deletingGroup && (
+        <ConfirmDialog
+          title="Delete reel group?"
+          message={`"${group.name}" and all ${versions.length} of its versions will be permanently deleted.`}
+          onConfirm={handleDeleteGroup}
+          onCancel={() => setDeletingGroup(false)}
+          busy={busy}
+        />
+      )}
+
+      {deletingVersion && (
+        <ConfirmDialog
+          title={`Delete V${deletingVersion.versionNumber}?`}
+          message={deletingVersion.isWinner
+            ? 'This is the published winner — deleting it will put the trial back to live.'
+            : 'This version and its stats will be permanently deleted.'}
+          onConfirm={handleDeleteVersion}
+          onCancel={() => setDeletingVersion(null)}
+          busy={busy}
+        />
       )}
     </div>
   )

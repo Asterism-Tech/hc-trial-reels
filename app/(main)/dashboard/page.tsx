@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { fetchTrialGroups } from '@/lib/data'
 import { TrialGroup } from '@/lib/types'
 import OverviewCards from '@/components/analytics/OverviewCards'
+import CampaignReminderPanel from '@/components/trials/CampaignReminderPanel'
 import Badge, { statusBadgeVariant } from '@/components/ui/Badge'
 import SkeletonCard from '@/components/ui/SkeletonCard'
 import EmptyState from '@/components/ui/EmptyState'
@@ -45,6 +46,9 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-bold text-[#45132c]">Dashboard</h1>
         <p className="text-[#8a5a70] text-sm mt-1">Overview of your Trial Reel performance</p>
       </div>
+
+      {/* Campaign data reminders — dismissible */}
+      {!loading && <CampaignReminderPanel groups={groups} onGroupsChange={setGroups} />}
 
       {loading ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

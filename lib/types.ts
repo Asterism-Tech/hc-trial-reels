@@ -8,8 +8,10 @@ export interface TrialGroup {
   contentTheme: string[]
   uploadDate: string
   publishDate: string
+  /** Global tags — apply to every version in the group */
   tags: string[]
   notes: string
+  dataReminderDismissed: boolean
   versions: Version[]
   createdAt: string
   updatedAt: string
@@ -34,6 +36,8 @@ export interface Version {
   caption: string
   ctaUsed: string[]
   targetAgeGroup: string
+  /** Version tags — used to compare versions against each other */
+  tags: string[]
   views: number
   accountsReached: number
   likes: number

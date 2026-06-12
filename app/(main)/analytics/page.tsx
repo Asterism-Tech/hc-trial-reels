@@ -6,7 +6,6 @@ import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { fetchTrialGroups } from '@/lib/data'
 import { TrialGroup } from '@/lib/types'
-import ViewsByVersionChart from '@/components/analytics/ViewsByVersionChart'
 import CompletionTrendChart from '@/components/analytics/CompletionTrendChart'
 import TagPerformanceMatrix from '@/components/analytics/TagPerformanceMatrix'
 import HookTypeChart from '@/components/analytics/HookTypeChart'
@@ -55,7 +54,10 @@ export default function AnalyticsPage() {
 
   const allTags = useMemo(() => {
     const tags = new Set<string>()
-    groups.forEach((g) => g.tags.forEach((t) => tags.add(t)))
+    groups.forEach((g) => {
+      g.tags.forEach((t) => tags.add(t))
+      g.versions.forEach((v) => v.tags.forEach((t) => tags.add(t)))
+    })
     return ['All', ...Array.from(tags)]
   }, [groups])
 
@@ -69,7 +71,9 @@ export default function AnalyticsPage() {
       result = result.filter((g) => g.contentTheme.includes(theme))
     }
     if (tagFilter !== 'All') {
-      result = result.filter((g) => g.tags.includes(tagFilter))
+      result = result.filter((g) =>
+        g.tags.includes(tagFilter) || g.versions.some((v) => v.tags.includes(tagFilter))
+      )
     }
     if (dateRange > 0) {
       const cutoff = new Date()
@@ -156,13 +160,6 @@ export default function AnalyticsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          <SectionCard
-            title="Views by Version"
-            subtitle="Compare views across all versions. Gold bars = winner."
-          >
-            <ViewsByVersionChart groups={filtered} />
-          </SectionCard>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <SectionCard
               title="Completion Rate Trends"
@@ -181,7 +178,7 @@ export default function AnalyticsPage() {
 
           <SectionCard
             title="Tag Performance Matrix"
-            subtitle="Which tags correlate with the best performance? Sorted by win rate."
+            subtitle="How version tags compare against each other — which choices win trials?"
           >
             <TagPerformanceMatrix groups={filtered} />
           </SectionCard>

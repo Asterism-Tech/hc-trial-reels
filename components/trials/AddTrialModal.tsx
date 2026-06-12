@@ -26,7 +26,10 @@ interface VersionForm {
   hookText: string
   videoLengthSeconds: string
   differences: string
+  tags: string[]
 }
+
+const EMPTY_VERSION: VersionForm = { platform: [], hookType: '', hookText: '', videoLengthSeconds: '', differences: '', tags: [] }
 
 interface AddTrialModalProps {
   onClose: () => void
@@ -43,18 +46,14 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
   const [contentTheme, setContentTheme] = useState<string[]>([])
   const [numVersions, setNumVersions] = useState(2)
   const [uploadDate, setUploadDate] = useState('')
-  const [publishDate, setPublishDate] = useState('')
   const [tags, setTags] = useState<string[]>([])
-  const [versions, setVersions] = useState<VersionForm[]>([
-    { platform: [], hookType: '', hookText: '', videoLengthSeconds: '', differences: '' },
-    { platform: [], hookType: '', hookText: '', videoLengthSeconds: '', differences: '' },
-  ])
+  const [versions, setVersions] = useState<VersionForm[]>([EMPTY_VERSION, EMPTY_VERSION])
 
   const updateVersions = (count: number) => {
     setNumVersions(count)
     setVersions((prev) => {
       if (count > prev.length) {
-        return [...prev, ...Array(count - prev.length).fill({ platform: [], hookType: '', hookText: '', videoLengthSeconds: '', differences: '' })]
+        return [...prev, ...Array(count - prev.length).fill(EMPTY_VERSION)]
       }
       return prev.slice(0, count)
     })
@@ -86,7 +85,8 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
           test_type: testType,
           content_theme: contentTheme,
           upload_date: uploadDate || null,
-          publish_date: publishDate || null,
+          // publish_date stays null until a winner is marked — winners are the published reels
+          publish_date: null,
           tags,
           notes: '',
         })
@@ -113,6 +113,7 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
         caption: '',
         cta_used: [],
         target_age_group: '',
+        tags: v.tags,
         views: 0, accounts_reached: 0, likes: 0, comments: 0, shares: 0,
         saves: 0, profile_visits: 0, followers_gained: 0,
         watch_time_seconds: 0, completion_rate_pct: 0,
@@ -219,30 +220,21 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Upload Date</label>
-                  <input
-                    type="date"
-                    value={uploadDate}
-                    onChange={(e) => setUploadDate(e.target.value)}
-                    className="w-full bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all [color-scheme:light]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Publish Date</label>
-                  <input
-                    type="date"
-                    value={publishDate}
-                    onChange={(e) => setPublishDate(e.target.value)}
-                    className="w-full bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all [color-scheme:light]"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Upload Date</label>
+                <input
+                  type="date"
+                  value={uploadDate}
+                  onChange={(e) => setUploadDate(e.target.value)}
+                  className="w-full bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all [color-scheme:light]"
+                />
+                <p className="text-[10px] text-[#a07080] mt-1">The publish date is set automatically when a version is marked as the winner.</p>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Tags</label>
+                <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Global Tags</label>
                 <TagPicker selected={tags} onChange={setTags} />
+                <p className="text-[10px] text-[#a07080] mt-1">Global tags apply to every version in this group. You&apos;ll add version-specific tags in the next step.</p>
               </div>
             </div>
           )}
@@ -318,6 +310,12 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
                         placeholder="Describe the variable being tested..."
                         className="w-full bg-white border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] placeholder-[#c0a0b0] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-[#8a5a70] mb-1.5">Version Tags</label>
+                      <TagPicker selected={v.tags} onChange={(t) => updateVersion(i, 'tags', t)} />
+                      <p className="text-[10px] text-[#a07080] mt-1">Tag what makes this version different — these tags are used to compare versions against each other.</p>
                     </div>
                   </div>
                 </div>
