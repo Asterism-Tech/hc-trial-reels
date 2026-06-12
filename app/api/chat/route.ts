@@ -2,7 +2,6 @@ import { NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { TrialGroup } from '@/lib/types'
 
 const ratelimit = new Ratelimit({
@@ -34,24 +33,13 @@ ${JSON.stringify(trialData)}`
     content: m.content,
   }))
 
-  const supabase = createServerSupabaseClient()
-
-  const lastUserMessage = messages[messages.length - 1]
-  if (lastUserMessage?.role === 'user') {
-    await supabase.from('chat_history').insert({
-      role: 'user',
-      content: lastUserMessage.content,
-    })
-  }
-
+  // Chat is session-only — messages are not persisted
   const stream = anthropic.messages.stream({
     model: 'claude-sonnet-4-6',
     max_tokens: 1024,
     system: systemPrompt,
     messages: anthropicMessages,
   })
-
-  let fullResponse = ''
 
   const readable = new ReadableStream({
     async start(controller) {
@@ -61,17 +49,10 @@ ${JSON.stringify(trialData)}`
           event.type === 'content_block_delta' &&
           event.delta.type === 'text_delta'
         ) {
-          const text = event.delta.text
-          fullResponse += text
-          controller.enqueue(encoder.encode(text))
+          controller.enqueue(encoder.encode(event.delta.text))
         }
       }
       controller.close()
-
-      await supabase.from('chat_history').insert({
-        role: 'assistant',
-        content: fullResponse,
-      })
     },
   })
 

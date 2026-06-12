@@ -29,6 +29,7 @@ export default function EditTrialGroupModal({ group, onClose, onSaved }: EditTri
   const [testType, setTestType] = useState(group.testType || TEST_TYPES[0])
   const [contentTheme, setContentTheme] = useState<string[]>(group.contentTheme)
   const [uploadDate, setUploadDate] = useState(group.uploadDate || '')
+  const [publishDate, setPublishDate] = useState(group.publishDate || '')
   const [tags, setTags] = useState<string[]>(group.tags)
   const [notes, setNotes] = useState(group.notes || '')
 
@@ -42,6 +43,7 @@ export default function EditTrialGroupModal({ group, onClose, onSaved }: EditTri
         test_type: testType,
         content_theme: contentTheme,
         upload_date: uploadDate || null,
+        publish_date: publishDate || null,
         tags,
         notes,
         updated_at: new Date().toISOString(),
@@ -50,7 +52,7 @@ export default function EditTrialGroupModal({ group, onClose, onSaved }: EditTri
     setSaving(false)
     if (error) { toast.error('Failed to save changes'); return }
     toast.success('Reel group updated')
-    onSaved({ ...group, name: name.trim(), testType, contentTheme, uploadDate, tags, notes })
+    onSaved({ ...group, name: name.trim(), testType, contentTheme, uploadDate, publishDate, tags, notes })
   }
 
   const inputClass = "w-full bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] placeholder-[#c0a0b0] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
@@ -108,8 +110,9 @@ export default function EditTrialGroupModal({ group, onClose, onSaved }: EditTri
             </div>
             <div>
               <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Publish Date</label>
-              <p className="text-xs text-[#a07080] bg-[#faf9f7] border border-dashed border-[#e8d5c4] rounded-lg px-3 py-2.5">
-                {group.publishDate ? group.publishDate : 'Set automatically when a winner is marked'}
+              <input type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} className={`${inputClass} [color-scheme:light]`} />
+              <p className="text-[10px] text-[#a07080] mt-1">
+                Set automatically when a winner is marked — adjust here if needed
               </p>
             </div>
           </div>

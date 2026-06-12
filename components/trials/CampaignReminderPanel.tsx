@@ -50,7 +50,7 @@ export default function CampaignReminderPanel({ groups, onGroupsChange }: Campai
               <div className="min-w-0">
                 <p className="text-sm font-medium text-[#45132c] truncate">{r.group.name}</p>
                 <p className="text-xs text-[#8a5a70]">
-                  Winner published {r.daysSincePublish} days ago — add views, followers from reel and notes
+                  Added {r.daysSinceCreated} days ago — add views, followers from reel and notes
                 </p>
               </div>
             </div>
@@ -78,7 +78,6 @@ export default function CampaignReminderPanel({ groups, onGroupsChange }: Campai
       {filling && (
         <CampaignDataModal
           group={filling.group}
-          winner={filling.winner}
           onClose={() => setFilling(null)}
           onSaved={handleSaved}
         />

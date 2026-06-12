@@ -10,6 +10,7 @@ import { TrialGroup } from '@/lib/types'
 import { formatDate, formatNumber } from '@/lib/utils'
 import SkeletonCard from '@/components/ui/SkeletonCard'
 import EmptyState from '@/components/ui/EmptyState'
+import CraftLoader from '@/components/ui/CraftLoader'
 import Badge, { statusBadgeVariant } from '@/components/ui/Badge'
 import { toast } from 'sonner'
 import type { TrendAnalysis } from '@/lib/export'
@@ -81,7 +82,6 @@ export default function ExportPage() {
     try {
       let analysis: TrendAnalysis | null = null
       if (includeAI) {
-        toast.info('Generating AI trend analysis...')
         try {
           analysis = await fetchAnalysis()
         } catch {
@@ -209,6 +209,8 @@ export default function ExportPage() {
       </div>
 
       {/* Export actions */}
+      {exporting && includeAI && <CraftLoader />}
+
       <div className="flex flex-wrap gap-3">
         <button
           type="button"

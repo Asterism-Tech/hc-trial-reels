@@ -76,7 +76,7 @@ export default function NotificationsBell() {
                       <div className="min-w-0">
                         <p className="text-xs font-medium text-[#45132c] truncate">{r.group.name}</p>
                         <p className="text-[11px] text-[#8a5a70] mt-0.5">
-                          Published {r.daysSincePublish} days ago — fill in views, followers from reel and notes
+                          Added {r.daysSinceCreated} days ago — fill in views, followers from reel and notes
                         </p>
                         <button
                           type="button"
@@ -106,7 +106,6 @@ export default function NotificationsBell() {
       {filling && (
         <CampaignDataModal
           group={filling.group}
-          winner={filling.winner}
           onClose={() => setFilling(null)}
           onSaved={handleSaved}
         />

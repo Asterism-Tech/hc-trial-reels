@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Send } from 'lucide-react'
 import { TrialGroup, ChatMessage } from '@/lib/types'
-import { supabase } from '@/lib/supabase'
 import { generateId } from '@/lib/utils'
 import TypingIndicator from './TypingIndicator'
 
@@ -53,32 +52,13 @@ function BoldText({ text }: { text: string }) {
 }
 
 export default function ChatInterface({ groups }: ChatInterfaceProps) {
+  // Chat is session-only: messages live in component state and clear when
+  // the page is left — no history is loaded or persisted.
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [loadingHistory, setLoadingHistory] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  useEffect(() => {
-    const loadHistory = async () => {
-      const { data } = await supabase
-        .from('chat_history')
-        .select('*')
-        .order('created_at', { ascending: true })
-        .limit(50)
-      if (data) {
-        setMessages(data.map((m) => ({
-          id: m.id,
-          role: m.role,
-          content: m.content,
-          createdAt: m.created_at,
-        })))
-      }
-      setLoadingHistory(false)
-    }
-    loadHistory()
-  }, [])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -165,14 +145,10 @@ export default function ChatInterface({ groups }: ChatInterfaceProps) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0 bg-[#faf9f7]">
-        {loadingHistory && (
-          <div className="text-center text-xs text-[#a07080] py-4">Loading history...</div>
-        )}
-
-        {!loadingHistory && messages.length === 0 && (
+        {messages.length === 0 && (
           <div className="text-center py-8">
             <p className="text-[#a07080] text-sm mb-2">No messages yet</p>
-            <p className="text-[#b09090] text-xs">Ask a question below to get started</p>
+            <p className="text-[#b09090] text-xs">Ask a question below to get started — chats clear when you leave</p>
           </div>
         )}
 
@@ -203,7 +179,7 @@ export default function ChatInterface({ groups }: ChatInterfaceProps) {
       </div>
 
       {/* Starter chips */}
-      {messages.length === 0 && !loadingHistory && (
+      {messages.length === 0 && (
         <div className="px-4 pb-2 flex flex-wrap gap-1.5 bg-[#faf9f7]">
           {STARTER_PROMPTS.map((p) => (
             <button
