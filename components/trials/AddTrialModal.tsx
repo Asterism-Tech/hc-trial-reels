@@ -9,20 +9,15 @@ import { useRouter } from 'next/navigation'
 import ModalPortal from '@/components/ui/ModalPortal'
 
 const TEST_TYPES = [
-  'Voiceover Test', 'Hook Test', 'Visual Opening',
-  'Music Test', 'Pacing Test', 'Caption Test', 'Other',
+  'Voiceover Test', 'Visual Opening', 'Music',
+  'No Voiceover vs Voiceover', 'Caption',
 ]
 
-const CONTENT_THEMES = [
-  'Ideas/Projects/How to', 'Product', 'Behind the Scenes',
-  'Tutorial', 'Trending', 'User Generated', 'Seasonal',
-]
+const CONTENT_THEMES = ['Ideas/Projects/How to', 'Product', 'Trends']
 
-const PLATFORMS = ['Instagram', 'TikTok', 'Facebook', 'YouTube Shorts']
-const HOOK_TYPES = ['Visual', 'Audio', 'Text', 'Question']
+const HOOK_TYPES = ['Visual Hook', 'Audio Hook']
 
 interface VersionForm {
-  platform: string[]
   hookType: string
   hookText: string
   videoLengthSeconds: string
@@ -30,7 +25,7 @@ interface VersionForm {
   tags: string[]
 }
 
-const EMPTY_VERSION: VersionForm = { platform: [], hookType: '', hookText: '', videoLengthSeconds: '', differences: '', tags: [] }
+const EMPTY_VERSION: VersionForm = { hookType: '', hookText: '', videoLengthSeconds: '', differences: '', tags: [] }
 
 interface AddTrialModalProps {
   onClose: () => void
@@ -68,12 +63,6 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
     })
   }
 
-  const togglePlatform = (i: number, platform: string) => {
-    const current = versions[i].platform
-    const next = current.includes(platform) ? current.filter((p) => p !== platform) : [...current, platform]
-    updateVersion(i, 'platform', next)
-  }
-
   const handleSubmit = async () => {
     if (!name.trim()) { toast.error('Group name is required'); return }
     setSubmitting(true)
@@ -102,7 +91,8 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
         total_versions: numVersions,
         is_winner: false,
         is_published: false,
-        platform: v.platform,
+        platform: ['Instagram'], // trials always run on Instagram
+        secondary_platform: [],
         hook_type: v.hookType,
         hook_text: v.hookText,
         video_length_seconds: parseInt(v.videoLengthSeconds) || 0,
@@ -248,26 +238,6 @@ export default function AddTrialModal({ onClose, onCreated }: AddTrialModalProps
                   <h3 className="text-sm font-semibold text-[#45132c] mb-3">Version {i + 1}</h3>
 
                   <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs text-[#8a5a70] mb-1.5">Platform</label>
-                      <div className="flex flex-wrap gap-2">
-                        {PLATFORMS.map((p) => (
-                          <button
-                            key={p}
-                            type="button"
-                            onClick={() => togglePlatform(i, p)}
-                            className={`px-3 py-1 rounded-lg text-xs border transition-all duration-200 ${
-                              v.platform.includes(p)
-                                ? 'bg-[#45132c]/10 border-[#45132c]/30 text-[#45132c]'
-                                : 'border-[#e8d5c4] text-[#8a5a70] hover:border-[#dcc8b0]'
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs text-[#8a5a70] mb-1.5">Hook Type</label>

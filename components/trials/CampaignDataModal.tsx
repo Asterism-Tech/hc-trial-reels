@@ -15,9 +15,12 @@ interface CampaignDataModalProps {
   onSaved: (updatedGroup: TrialGroup) => void
 }
 
+const SECONDARY_PLATFORMS = ['TikTok', 'Facebook', 'YouTube Shorts']
+
 interface VersionEntry {
   views: string
   followers: string
+  secondaryPlatform: string[]
 }
 
 export default function CampaignDataModal({ group, onClose, onSaved }: CampaignDataModalProps) {
@@ -31,12 +34,20 @@ export default function CampaignDataModal({ group, onClose, onSaved }: CampaignD
     Object.fromEntries(editable.map((v) => [v.id, {
       views: v.views ? String(v.views) : '',
       followers: v.followersGained ? String(v.followersGained) : '',
+      secondaryPlatform: v.secondaryPlatform || [],
     }]))
   )
   const [notes, setNotes] = useState(group.notes || '')
 
-  const updateEntry = (id: string, field: keyof VersionEntry, value: string) => {
+  const updateEntry = (id: string, field: keyof VersionEntry, value: string | string[]) => {
     setEntries((prev) => ({ ...prev, [id]: { ...prev[id], [field]: value } }))
+  }
+
+  const toggleSecondary = (id: string, platform: string) => {
+    const current = entries[id].secondaryPlatform
+    updateEntry(id, 'secondaryPlatform', current.includes(platform)
+      ? current.filter((p) => p !== platform)
+      : [...current, platform])
   }
 
   const handleSave = async () => {
@@ -48,6 +59,7 @@ export default function CampaignDataModal({ group, onClose, onSaved }: CampaignD
         .update({
           views: parseInt(entries[v.id].views) || 0,
           followers_gained: parseInt(entries[v.id].followers) || 0,
+          secondary_platform: entries[v.id].secondaryPlatform,
           updated_at: new Date().toISOString(),
         })
         .eq('id', v.id)
@@ -65,7 +77,12 @@ export default function CampaignDataModal({ group, onClose, onSaved }: CampaignD
 
     const updatedVersions = group.versions.map((v) =>
       entries[v.id]
-        ? { ...v, views: parseInt(entries[v.id].views) || 0, followersGained: parseInt(entries[v.id].followers) || 0 }
+        ? {
+            ...v,
+            views: parseInt(entries[v.id].views) || 0,
+            followersGained: parseInt(entries[v.id].followers) || 0,
+            secondaryPlatform: entries[v.id].secondaryPlatform,
+          }
         : v
     )
     onSaved({ ...group, notes, versions: updatedVersions })
@@ -126,6 +143,26 @@ export default function CampaignDataModal({ group, onClose, onSaved }: CampaignD
                       placeholder="e.g. 120"
                       className={inputClass}
                     />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Did this go anywhere else?</label>
+                  <div className="flex flex-wrap gap-2">
+                    {SECONDARY_PLATFORMS.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => toggleSecondary(v.id, p)}
+                        className={`px-3 py-1 rounded-full text-xs border transition-all duration-200 ${
+                          entries[v.id].secondaryPlatform.includes(p)
+                            ? 'bg-[#ed4a7e]/10 border-[#ed4a7e]/40 text-[#c02860]'
+                            : 'border-[#e8d5c4] text-[#8a5a70] hover:border-[#dcc8b0]'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>

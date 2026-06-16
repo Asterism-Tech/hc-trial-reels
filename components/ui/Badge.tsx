@@ -20,8 +20,8 @@ const variantClasses: Record<string, string> = {
 }
 
 const statusVariantMap: Record<TrialStatus, string> = {
-  live: 'purple',
-  won: 'gold',
+  live: 'blue',
+  won: 'green', // winner / published — green, never red
   archived: 'grey',
 }
 

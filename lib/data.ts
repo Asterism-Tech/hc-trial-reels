@@ -10,6 +10,7 @@ function mapVersion(row: Record<string, unknown>): Version {
     isWinner: row.is_winner as boolean,
     isPublished: row.is_published as boolean,
     platform: (row.platform as string[]) || [],
+    secondaryPlatform: (row.secondary_platform as string[]) || [],
     differences: (row.differences as string) || '',
     hookType: (row.hook_type as string) || '',
     hookText: (row.hook_text as string) || '',

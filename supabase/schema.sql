@@ -28,7 +28,8 @@ create table versions (
   total_versions integer not null,
   is_winner boolean default false,
   is_published boolean default false,
-  platform text[],
+  platform text[], -- primary platform: always Instagram for Hobbycraft trials
+  secondary_platform text[] default '{}', -- also published here later (TikTok / Facebook), set at results time
   differences text,
   hook_type text,
   hook_text text,

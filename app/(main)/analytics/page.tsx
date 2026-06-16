@@ -65,7 +65,9 @@ export default function AnalyticsPage() {
     let result = groups
 
     if (platform !== 'All') {
-      result = result.filter((g) => g.versions.some((v) => v.platform.includes(platform)))
+      result = result.filter((g) =>
+        g.versions.some((v) => [...v.platform, ...v.secondaryPlatform].includes(platform))
+      )
     }
     if (theme !== 'All') {
       result = result.filter((g) => g.contentTheme.includes(theme))

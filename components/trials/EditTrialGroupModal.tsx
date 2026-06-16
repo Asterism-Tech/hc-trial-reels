@@ -9,14 +9,11 @@ import TagPicker from './TagPicker'
 import ModalPortal from '@/components/ui/ModalPortal'
 
 const TEST_TYPES = [
-  'Voiceover Test', 'Hook Test', 'Visual Opening',
-  'Music Test', 'Pacing Test', 'Caption Test', 'Other',
+  'Voiceover Test', 'Visual Opening', 'Music',
+  'No Voiceover vs Voiceover', 'Caption',
 ]
 
-const CONTENT_THEMES = [
-  'Ideas/Projects/How to', 'Product', 'Behind the Scenes',
-  'Tutorial', 'Trending', 'User Generated', 'Seasonal',
-]
+const CONTENT_THEMES = ['Ideas/Projects/How to', 'Product', 'Trends']
 
 interface EditTrialGroupModalProps {
   group: TrialGroup

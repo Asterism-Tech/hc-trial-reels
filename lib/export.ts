@@ -3,6 +3,7 @@ import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { TrialGroup } from './types'
 import { formatDate, formatNumber } from './utils'
+import { successScore } from './scoring'
 
 export interface TrendAnalysis {
   summary: string
@@ -52,6 +53,7 @@ function versionRows(groups: TrialGroup[]) {
       'Result': v.isWinner ? 'Winner (Published)' : g.status === 'won' ? 'Archived' : 'Live',
       'Version Tags': v.tags.join(', '),
       'Platform': v.platform.join(', '),
+      'Also Posted': v.secondaryPlatform.join(', '),
       'Hook Type': v.hookType,
       'Hook Text': v.hookText,
       'Differences': v.differences,
@@ -66,6 +68,7 @@ function versionRows(groups: TrialGroup[]) {
       'Followers Gained': v.followersGained,
       'Watch Time (s)': v.watchTimeSeconds,
       'Completion Rate (%)': v.completionRatePct,
+      'Success Score': successScore(v) ?? '',
     }))
   )
 }
@@ -170,7 +173,7 @@ export function exportPdf({ groups, startDate, endDate, analysis }: ExportOption
   doc.text('Version Comparison', 14, y)
   autoTable(doc, {
     startY: y + 4,
-    head: [['Reel Group', 'Version', 'Result', 'Version Tags', 'Hook', 'Views', 'Likes', 'Saves', 'Followers', 'Completion %']],
+    head: [['Reel Group', 'Version', 'Result', 'Version Tags', 'Hook', 'Views', 'Likes', 'Saves', 'Followers', 'Completion %', 'Score']],
     body: groups.flatMap((g) =>
       g.versions.map((v) => [
         g.name,
@@ -183,6 +186,7 @@ export function exportPdf({ groups, startDate, endDate, analysis }: ExportOption
         formatNumber(v.saves),
         String(v.followersGained),
         `${v.completionRatePct}%`,
+        successScore(v) === null ? '—' : String(successScore(v)),
       ])
     ),
     headStyles: { fillColor: AUBERGINE, fontSize: 8 },

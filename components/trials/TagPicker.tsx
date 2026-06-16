@@ -4,38 +4,62 @@ import { useState } from 'react'
 import { X, ChevronDown } from 'lucide-react'
 import { CustomTag, TagCategory } from '@/lib/types'
 
+// The global tag vocabulary, chosen as pills. Categories and values mirror
+// the Hobbycraft brief so the team tags every trial the same way.
 const PRESET_TAGS: { name: string; category: TagCategory; color: string }[] = [
-  { name: 'under-15s', category: 'duration', color: '#3B82F6' },
-  { name: '15-30s', category: 'duration', color: '#3B82F6' },
-  { name: '30-60s', category: 'duration', color: '#3B82F6' },
-  { name: '60s+', category: 'duration', color: '#3B82F6' },
-  { name: 'influencer-content', category: 'content-style', color: '#F97316' },
-  { name: 'snappy-editing', category: 'content-style', color: '#F97316' },
-  { name: 'slow-build', category: 'content-style', color: '#F97316' },
-  { name: 'tutorial-style', category: 'content-style', color: '#F97316' },
-  { name: 'product-focus', category: 'content-style', color: '#F97316' },
-  { name: 'original-sound', category: 'audio', color: '#EC4899' },
-  { name: 'trending-audio', category: 'audio', color: '#EC4899' },
-  { name: 'voiceover', category: 'audio', color: '#EC4899' },
-  { name: 'music-heavy', category: 'audio', color: '#EC4899' },
-  { name: 'no-audio', category: 'audio', color: '#EC4899' },
+  // Test Type
+  { name: 'Voiceover Test', category: 'test-type', color: '#7C3AED' },
+  { name: 'Visual Opening', category: 'test-type', color: '#7C3AED' },
+  { name: 'Music', category: 'test-type', color: '#7C3AED' },
+  { name: 'No Voiceover vs Voiceover', category: 'test-type', color: '#7C3AED' },
+  { name: 'Caption', category: 'test-type', color: '#7C3AED' },
+  // Age of Viewers
+  { name: '13-17', category: 'audience', color: '#14B8A6' },
   { name: '18-24', category: 'audience', color: '#14B8A6' },
   { name: '25-34', category: 'audience', color: '#14B8A6' },
   { name: '35-44', category: 'audience', color: '#14B8A6' },
-  { name: 'broad-audience', category: 'audience', color: '#14B8A6' },
-  { name: 'visual-hook', category: 'hook-type', color: '#EAB308' },
-  { name: 'audio-hook', category: 'hook-type', color: '#EAB308' },
-  { name: 'text-hook', category: 'hook-type', color: '#EAB308' },
-  { name: 'question-hook', category: 'hook-type', color: '#EAB308' },
+  { name: '45-54', category: 'audience', color: '#14B8A6' },
+  { name: '55-64', category: 'audience', color: '#14B8A6' },
+  { name: '65+', category: 'audience', color: '#14B8A6' },
+  // Type of Audio
+  { name: 'Trending', category: 'audio', color: '#F59E0B' },
+  { name: 'Generic / Themed', category: 'audio', color: '#F59E0B' },
+  { name: 'Soft Instrumental', category: 'audio', color: '#F59E0B' },
+  { name: 'Remix', category: 'audio', color: '#F59E0B' },
+  // Hook Type
+  { name: 'Visual Hook', category: 'hook-type', color: '#2563EB' },
+  { name: 'Audio Hook', category: 'hook-type', color: '#2563EB' },
+  // Video Length
+  { name: '15-20s', category: 'video-length', color: '#0EA5E9' },
+  { name: '20-30s', category: 'video-length', color: '#0EA5E9' },
+  { name: '30-45s', category: 'video-length', color: '#0EA5E9' },
+  { name: '45-55s', category: 'video-length', color: '#0EA5E9' },
+  { name: '60s-1.15m', category: 'video-length', color: '#0EA5E9' },
+  // Content Theme
+  { name: 'Ideas/Projects/How to', category: 'content-theme', color: '#16A34A' },
+  { name: 'Product', category: 'content-theme', color: '#16A34A' },
+  { name: 'Trends', category: 'content-theme', color: '#16A34A' },
+  // Format
+  { name: 'Text Overlay', category: 'format', color: '#6366F1' },
+  { name: 'Voiceover', category: 'format', color: '#6366F1' },
+  { name: 'Face on Camera', category: 'format', color: '#6366F1' },
+  { name: 'Detectable Person', category: 'format', color: '#6366F1' },
 ]
 
 const CATEGORY_LABELS: Record<TagCategory, string> = {
-  duration: 'Duration',
-  'content-style': 'Content Style',
-  audio: 'Audio',
-  audience: 'Audience',
+  'test-type': 'Test Type',
+  audience: 'Age of Viewers',
+  audio: 'Type of Audio',
   'hook-type': 'Hook Type',
+  'video-length': 'Video Length',
+  'content-theme': 'Content Theme',
+  format: 'Format',
   custom: 'Custom',
+}
+
+/** Label for any category string, falling back gracefully for legacy values. */
+function categoryLabel(category: string): string {
+  return CATEGORY_LABELS[category as TagCategory] ?? category.replace(/-/g, ' ')
 }
 
 interface TagPickerProps {
@@ -112,7 +136,7 @@ export default function TagPicker({ selected, onChange, customTags = [] }: TagPi
           {(Object.keys(grouped) as TagCategory[]).map((category) => (
             <div key={category} className="p-3 border-b border-[#f0e6d3] last:border-0">
               <p className="text-[10px] font-semibold text-[#a07080] uppercase tracking-wider mb-2">
-                {CATEGORY_LABELS[category]}
+                {categoryLabel(category)}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {grouped[category].map((tag) => {
@@ -144,4 +168,4 @@ export default function TagPicker({ selected, onChange, customTags = [] }: TagPi
   )
 }
 
-export { PRESET_TAGS, CATEGORY_LABELS }
+export { PRESET_TAGS, CATEGORY_LABELS, categoryLabel }

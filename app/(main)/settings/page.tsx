@@ -7,9 +7,9 @@ import { Plus, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { CustomTag, TagCategory } from '@/lib/types'
 import { toast } from 'sonner'
-import { PRESET_TAGS, CATEGORY_LABELS } from '@/components/trials/TagPicker'
+import { PRESET_TAGS, categoryLabel } from '@/components/trials/TagPicker'
 
-const TAG_CATEGORIES: TagCategory[] = ['duration', 'content-style', 'audio', 'audience', 'hook-type', 'custom']
+const TAG_CATEGORIES: TagCategory[] = ['test-type', 'audience', 'audio', 'hook-type', 'video-length', 'content-theme', 'format', 'custom']
 const PRESET_COLORS = ['#3B82F6', '#F97316', '#EC4899', '#14B8A6', '#EAB308', '#6B7280', '#A855D4', '#22C55E', '#EF4444']
 
 export default function SettingsPage() {
@@ -104,7 +104,7 @@ export default function SettingsPage() {
                 className="bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 text-sm text-[#45132c] focus:outline-none focus:border-[#45132c] focus:shadow-[0_0_0_3px_rgba(237,74,126,0.1)] transition-all"
               >
                 {TAG_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
+                  <option key={c} value={c}>{categoryLabel(c)}</option>
                 ))}
               </select>
             </div>
@@ -148,7 +148,7 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tag.color }} />
                   <span className="text-sm text-[#45132c]">{tag.name}</span>
-                  <span className="text-xs text-[#a07080]">{CATEGORY_LABELS[tag.category]}</span>
+                  <span className="text-xs text-[#a07080]">{categoryLabel(tag.category)}</span>
                 </div>
                 {deleteConfirm === tag.id ? (
                   <div className="flex gap-2">
@@ -177,7 +177,7 @@ export default function SettingsPage() {
           {Object.entries(groupedPresets).map(([category, tags]) => (
             <div key={category}>
               <p className="text-xs font-semibold text-[#a07080] uppercase tracking-wider mb-2">
-                {CATEGORY_LABELS[category as TagCategory]}
+                {categoryLabel(category)}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {tags.map((tag) => (

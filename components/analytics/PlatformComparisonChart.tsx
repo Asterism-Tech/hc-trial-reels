@@ -15,12 +15,15 @@ export default function PlatformComparisonChart({ groups }: Props) {
   const stats: Record<string, PlatformStats> = {
     Instagram: { views: [], completion: [], saves: [] },
     TikTok: { views: [], completion: [], saves: [] },
+    Facebook: { views: [], completion: [], saves: [] },
+    'YouTube Shorts': { views: [], completion: [], saves: [] },
   }
 
   for (const g of groups) {
     for (const v of g.versions) {
       if (v.views === 0) continue
-      for (const p of v.platform) {
+      // Primary (Instagram) plus anywhere the version was also published
+      for (const p of [...v.platform, ...v.secondaryPlatform]) {
         if (stats[p]) {
           stats[p].views.push(v.views)
           stats[p].completion.push(v.completionRatePct)
@@ -42,6 +45,8 @@ export default function PlatformComparisonChart({ groups }: Props) {
   const PLATFORM_COLORS: Record<string, string> = {
     Instagram: '#E1306C',
     TikTok: '#14B8A6',
+    Facebook: '#1877F2',
+    'YouTube Shorts': '#FF0000',
   }
 
   return (

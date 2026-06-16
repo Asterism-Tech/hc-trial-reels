@@ -24,7 +24,10 @@ export interface Version {
   totalVersions: number
   isWinner: boolean
   isPublished: boolean
+  /** Primary platform — always Instagram for Hobbycraft trials */
   platform: string[]
+  /** Where this version was also published, if anywhere (e.g. TikTok, Facebook) */
+  secondaryPlatform: string[]
   differences: string
   hookType: string
   hookText: string
@@ -61,7 +64,15 @@ export interface CustomTag {
   color: string
 }
 
-export type TagCategory = 'duration' | 'content-style' | 'audio' | 'audience' | 'hook-type' | 'custom'
+export type TagCategory =
+  | 'test-type'
+  | 'audience'
+  | 'audio'
+  | 'hook-type'
+  | 'video-length'
+  | 'content-theme'
+  | 'format'
+  | 'custom'
 
 export interface ChatMessage {
   id: string

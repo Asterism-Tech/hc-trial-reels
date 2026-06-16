@@ -3,13 +3,14 @@
 import { Version } from '@/lib/types'
 import { formatNumber } from '@/lib/utils'
 import { versionColor, WINNER_COLOR } from '@/lib/version-colors'
+import { successScore } from '@/lib/scoring'
 import { Crown, Check, Minus, TrendingUp } from 'lucide-react'
 
 interface VersionComparisonTableProps {
   versions: Version[]
 }
 
-type Kind = 'text' | 'longtext' | 'bool' | 'number' | 'seconds' | 'pct' | 'list' | 'tags'
+type Kind = 'text' | 'longtext' | 'bool' | 'number' | 'seconds' | 'pct' | 'list' | 'tags' | 'score'
 
 type RowDef = {
   label: string
@@ -31,6 +32,7 @@ const SECTIONS: { title: string; rows: RowDef[] }[] = [
     title: 'Format & Delivery',
     rows: [
       { label: 'Platform', key: 'platform', kind: 'list' },
+      { label: 'Also Posted', key: 'secondaryPlatform', kind: 'list' },
       { label: 'Video Length', key: 'videoLengthSeconds', kind: 'seconds' },
       { label: 'Face on Camera', key: 'faceOnCamera', kind: 'bool' },
       { label: 'Voiceover', key: 'hasVoiceover', kind: 'bool' },
@@ -53,6 +55,7 @@ const SECTIONS: { title: string; rows: RowDef[] }[] = [
       { label: 'Followers Gained', key: 'followersGained', kind: 'number' },
       { label: 'Watch Time', key: 'watchTimeSeconds', kind: 'seconds' },
       { label: 'Completion Rate', key: 'completionRatePct', kind: 'pct' },
+      { label: 'Success Score', key: 'views', kind: 'score' },
     ],
   },
 ]
@@ -60,6 +63,10 @@ const SECTIONS: { title: string; rows: RowDef[] }[] = [
 function displayValue(version: Version, row: RowDef): string {
   const raw = version[row.key]
   switch (row.kind) {
+    case 'score': {
+      const s = successScore(version)
+      return s === null ? '—' : String(s)
+    }
     case 'bool': return raw ? 'Yes' : 'No'
     case 'number': return formatNumber(Number(raw) || 0)
     case 'seconds': return raw ? `${raw}s` : '—'
@@ -108,7 +115,7 @@ function Cell({ version, row, isBest }: { version: Version; row: RowDef; isBest:
   const text = displayValue(version, row)
   const isEmpty = text === '—' || text === '0' || text === '0%' || text === '0s'
 
-  if (row.kind === 'number' || row.kind === 'pct' || (row.kind === 'seconds' && SECTIONS[2].rows.includes(row))) {
+  if (row.kind === 'number' || row.kind === 'pct' || row.kind === 'score' || (row.kind === 'seconds' && SECTIONS[2].rows.includes(row))) {
     return (
       <span className={`font-mono tabular-nums inline-flex items-center gap-1 ${
         isBest ? 'text-[#ed4a7e] font-bold' : isEmpty ? 'text-[#c0a0b0]' : 'text-[#5a2040]'
@@ -135,8 +142,11 @@ export default function VersionComparisonTable({ versions }: VersionComparisonTa
 
   // In the performance section the interesting signal is the best value per
   // row, not "values differ" (numbers nearly always differ).
+  const cellNumber = (v: Version, row: RowDef): number =>
+    row.kind === 'score' ? (successScore(v) ?? 0) : (Number(v[row.key]) || 0)
+
   const bestValue = (row: RowDef): number => {
-    const vals = versions.map((v) => Number(v[row.key]) || 0)
+    const vals = versions.map((v) => cellNumber(v, row))
     const max = Math.max(...vals)
     return max > 0 ? max : NaN
   }
@@ -199,7 +209,7 @@ export default function VersionComparisonTable({ versions }: VersionComparisonTa
                       </span>
                     </td>
                     {versions.map((v) => {
-                      const isBest = isPerformance && !isNaN(best) && (Number(v[row.key]) || 0) === best
+                      const isBest = isPerformance && !isNaN(best) && cellNumber(v, row) === best
                       return (
                         <td
                           key={v.id}

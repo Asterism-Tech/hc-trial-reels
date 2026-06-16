@@ -14,6 +14,7 @@ import EditVersionModal from './EditVersionModal'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { formatDate, isSafeImageUrl } from '@/lib/utils'
 import { versionColor, WINNER_COLOR } from '@/lib/version-colors'
+import { successScore, scoreColor } from '@/lib/scoring'
 
 interface TrialGroupCardProps {
   group: TrialGroup
@@ -284,6 +285,7 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
             {versions.map((v, vIdx) => {
               const color = versionColor(v.versionNumber)
               const isArchived = !v.isWinner && (group.status === 'won' || group.status === 'archived')
+              const score = successScore(v)
               return (
                 <div
                   key={v.id}
@@ -345,6 +347,30 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
                       )}
                     </div>
                   </div>
+
+                  {/* Success score + secondary platforms */}
+                  {(score !== null || v.secondaryPlatform.length > 0) && (
+                    <div className="flex items-center flex-wrap gap-1.5 mb-3">
+                      {score !== null && (
+                        <span
+                          className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                          style={{ backgroundColor: scoreColor(score) + '1f', color: scoreColor(score) }}
+                          title="Success score (0–100) — weighted across completion, engagement, saves, shares, follows and watch time"
+                        >
+                          Score {score}
+                        </span>
+                      )}
+                      {v.secondaryPlatform.map((p) => (
+                        <span
+                          key={p}
+                          className="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-[#ed4a7e]/10 text-[#c02860]"
+                          title="Also published here"
+                        >
+                          + {p}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Version tags */}
                   {v.tags.length > 0 && (

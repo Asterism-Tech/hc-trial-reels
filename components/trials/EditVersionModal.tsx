@@ -9,8 +9,8 @@ import TagPicker from './TagPicker'
 import { versionColor } from '@/lib/version-colors'
 import ModalPortal from '@/components/ui/ModalPortal'
 
-const PLATFORMS = ['Instagram', 'TikTok', 'Facebook', 'YouTube Shorts']
-const HOOK_TYPES = ['Visual', 'Audio', 'Text', 'Question']
+const SECONDARY_PLATFORMS = ['TikTok', 'Facebook', 'YouTube Shorts']
+const HOOK_TYPES = ['Visual Hook', 'Audio Hook']
 
 interface EditVersionModalProps {
   version: Version
@@ -20,7 +20,7 @@ interface EditVersionModalProps {
 
 export default function EditVersionModal({ version, onClose, onSaved }: EditVersionModalProps) {
   const [saving, setSaving] = useState(false)
-  const [platform, setPlatform] = useState<string[]>(version.platform)
+  const [secondaryPlatform, setSecondaryPlatform] = useState<string[]>(version.secondaryPlatform)
   const [hookType, setHookType] = useState(version.hookType)
   const [hookText, setHookText] = useState(version.hookText)
   const [videoLengthSeconds, setVideoLengthSeconds] = useState(String(version.videoLengthSeconds || ''))
@@ -33,7 +33,7 @@ export default function EditVersionModal({ version, onClose, onSaved }: EditVers
     const { error } = await supabase
       .from('versions')
       .update({
-        platform,
+        secondary_platform: secondaryPlatform,
         hook_type: hookType,
         hook_text: hookText,
         video_length_seconds: parseInt(videoLengthSeconds) || 0,
@@ -48,7 +48,7 @@ export default function EditVersionModal({ version, onClose, onSaved }: EditVers
     toast.success(`V${version.versionNumber} updated`)
     onSaved({
       ...version,
-      platform,
+      secondaryPlatform,
       hookType,
       hookText,
       videoLengthSeconds: parseInt(videoLengthSeconds) || 0,
@@ -84,17 +84,29 @@ export default function EditVersionModal({ version, onClose, onSaved }: EditVers
         <div className="px-6 py-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">Platform</label>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-[#45132c]/10 text-[#45132c] border border-[#45132c]/20">
+                Instagram
+              </span>
+              <span className="text-[10px] text-[#a07080]">Trials always run on Instagram</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-[#8a5a70] mb-1.5">
+              Also published elsewhere? <span className="font-normal text-[#a07080]">(if this version went onto another platform)</span>
+            </label>
             <div className="flex flex-wrap gap-2">
-              {PLATFORMS.map((p) => (
+              {SECONDARY_PLATFORMS.map((p) => (
                 <button
                   key={p}
                   type="button"
-                  onClick={() => setPlatform((prev) =>
+                  onClick={() => setSecondaryPlatform((prev) =>
                     prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
                   )}
                   className={`px-3 py-1 rounded-lg text-xs border transition-all duration-200 ${
-                    platform.includes(p)
-                      ? 'bg-[#45132c]/10 border-[#45132c]/30 text-[#45132c]'
+                    secondaryPlatform.includes(p)
+                      ? 'bg-[#ed4a7e]/10 border-[#ed4a7e]/40 text-[#c02860]'
                       : 'border-[#e8d5c4] text-[#8a5a70] hover:border-[#dcc8b0]'
                   }`}
                 >
