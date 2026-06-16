@@ -446,7 +446,7 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
                           <button
                             type="button"
                             onClick={() => {
-                              setEditingSecondaryPlatform((prev) => new Set([...prev, v.id]))
+                              setEditingSecondaryPlatform((prev) => new Set(Array.from(prev).concat(v.id)))
                               setSecondaryPlatformDraft((prev) => ({ ...prev, [v.id]: { platform: '', date: '' } }))
                             }}
                             className="ml-auto flex items-center gap-0.5 text-[#ed4a7e] hover:text-[#c02860] font-semibold transition-colors"
