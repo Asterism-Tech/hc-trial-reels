@@ -1,9 +1,9 @@
 'use client'
 
-import { Version } from '@/lib/types'
+import { Version, Snapshot } from '@/lib/types'
 import { formatNumber } from '@/lib/utils'
 import { versionColor, WINNER_COLOR } from '@/lib/version-colors'
-import { successScore } from '@/lib/scoring'
+import { calculateGroupScores, scoreColor } from '@/lib/scoring'
 import { Crown, Check, Minus, TrendingUp } from 'lucide-react'
 
 interface VersionComparisonTableProps {
@@ -43,7 +43,7 @@ const SECTIONS: { title: string; rows: RowDef[] }[] = [
     ],
   },
   {
-    title: 'Performance',
+    title: 'Performance (24h snapshot)',
     rows: [
       { label: 'Views', key: 'views', kind: 'number' },
       { label: 'Accounts Reached', key: 'accountsReached', kind: 'number' },
@@ -60,13 +60,29 @@ const SECTIONS: { title: string; rows: RowDef[] }[] = [
   },
 ]
 
-function displayValue(version: Version, row: RowDef): string {
+function emptySnap24h(v: Version): Snapshot {
+  return {
+    takenAt: '24h',
+    capturedDate: '',
+    views: v.views,
+    accountsReached: v.accountsReached,
+    likes: v.likes,
+    comments: v.comments,
+    shares: v.shares,
+    saves: v.saves,
+    profileVisits: v.profileVisits,
+    followersGained: v.followersGained,
+    watchTimeSeconds: v.watchTimeSeconds,
+    completionRatePct: v.completionRatePct,
+    successScore: null,
+  }
+}
+
+function displayValue(version: Version, row: RowDef, relativeScore?: number | null): string {
   const raw = version[row.key]
   switch (row.kind) {
-    case 'score': {
-      const s = successScore(version)
-      return s === null ? '—' : String(s)
-    }
+    case 'score':
+      return relativeScore != null ? String(relativeScore) : '—'
     case 'bool': return raw ? 'Yes' : 'No'
     case 'number': return formatNumber(Number(raw) || 0)
     case 'seconds': return raw ? `${raw}s` : '—'
@@ -82,7 +98,17 @@ function rowDiffers(versions: Version[], row: RowDef): boolean {
   return new Set(versions.map((v) => displayValue(v, row))).size > 1
 }
 
-function Cell({ version, row, isBest }: { version: Version; row: RowDef; isBest: boolean }) {
+function Cell({
+  version,
+  row,
+  isBest,
+  relativeScore,
+}: {
+  version: Version
+  row: RowDef
+  isBest: boolean
+  relativeScore?: number | null
+}) {
   const raw = version[row.key]
   const color = versionColor(version.versionNumber)
 
@@ -112,10 +138,25 @@ function Cell({ version, row, isBest }: { version: Version; row: RowDef; isBest:
     )
   }
 
-  const text = displayValue(version, row)
+  const text = displayValue(version, row, relativeScore)
   const isEmpty = text === '—' || text === '0' || text === '0%' || text === '0s'
 
-  if (row.kind === 'number' || row.kind === 'pct' || row.kind === 'score' || (row.kind === 'seconds' && SECTIONS[2].rows.includes(row))) {
+  if (row.kind === 'score') {
+    const score = relativeScore
+    if (score == null) return <span className="text-[#c0a0b0] font-mono">—</span>
+    return (
+      <span
+        className="inline-flex items-center gap-1 text-xs font-bold px-1.5 py-0.5 rounded-full"
+        style={{ backgroundColor: scoreColor(score) + '1f', color: scoreColor(score) }}
+        title="Relative success score — weighted: completion 35%, watch time 25%, saves 20%, shares 10%, likes 10%"
+      >
+        {score}
+        {isBest && <TrendingUp size={10} />}
+      </span>
+    )
+  }
+
+  if (row.kind === 'number' || row.kind === 'pct' || (row.kind === 'seconds' && SECTIONS[2].rows.includes(row))) {
     return (
       <span className={`font-mono tabular-nums inline-flex items-center gap-1 ${
         isBest ? 'text-[#ed4a7e] font-bold' : isEmpty ? 'text-[#c0a0b0]' : 'text-[#5a2040]'
@@ -140,10 +181,18 @@ function Cell({ version, row, isBest }: { version: Version; row: RowDef; isBest:
 export default function VersionComparisonTable({ versions }: VersionComparisonTableProps) {
   if (versions.length === 0) return null
 
-  // In the performance section the interesting signal is the best value per
-  // row, not "values differ" (numbers nearly always differ).
-  const cellNumber = (v: Version, row: RowDef): number =>
-    row.kind === 'score' ? (successScore(v) ?? 0) : (Number(v[row.key]) || 0)
+  // Relative success scores for the performance section
+  const scoreItems = versions.map((v) => ({
+    snap: v.snapshots.find((s) => s.takenAt === '24h') ?? emptySnap24h(v),
+    videoLengthSeconds: v.videoLengthSeconds,
+  }))
+  const relativeScores = calculateGroupScores(scoreItems)
+  const scoreByVersionId = Object.fromEntries(versions.map((v, i) => [v.id, relativeScores[i]]))
+
+  const cellNumber = (v: Version, row: RowDef): number => {
+    if (row.kind === 'score') return scoreByVersionId[v.id] ?? 0
+    return Number(v[row.key]) || 0
+  }
 
   const bestValue = (row: RowDef): number => {
     const vals = versions.map((v) => cellNumber(v, row))
@@ -194,17 +243,14 @@ export default function VersionComparisonTable({ versions }: VersionComparisonTa
                 const best = isPerformance ? bestValue(row) : NaN
                 return (
                   <tr
-                    key={String(row.key)}
+                    key={String(row.key) + row.label}
                     className="border-b border-[#f7f1e8] last:border-0 hover:bg-[#faf9f7]/80 transition-colors duration-150 group"
                   >
                     <td className="py-2 px-3 text-xs text-[#8a5a70] font-medium sticky left-0 bg-white group-hover:bg-[#faf9f7] transition-colors duration-150 align-top">
                       <span className="inline-flex items-center gap-1.5">
                         {row.label}
                         {differs && (
-                          <span
-                            className="w-1.5 h-1.5 rounded-full bg-[#ed4a7e] shrink-0"
-                            title="Versions differ on this"
-                          />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#ed4a7e] shrink-0" title="Versions differ on this" />
                         )}
                       </span>
                     </td>
@@ -216,7 +262,12 @@ export default function VersionComparisonTable({ versions }: VersionComparisonTa
                           className="py-2 px-3 text-xs align-top"
                           style={v.isWinner ? { backgroundColor: '#fdf2f6' } : undefined}
                         >
-                          <Cell version={v} row={row} isBest={isBest} />
+                          <Cell
+                            version={v}
+                            row={row}
+                            isBest={isBest}
+                            relativeScore={row.kind === 'score' ? scoreByVersionId[v.id] : undefined}
+                          />
                         </td>
                       )
                     })}

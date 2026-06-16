@@ -14,7 +14,8 @@ export default function VersionChip({ version, groupStatus, onClick, active }: V
   const isWinner = version.isWinner
   // Once a trial has a winner, the winner is the published reel and the rest are archived
   const isArchived = !isWinner && (groupStatus === 'won' || groupStatus === 'archived')
-  const hasStats = version.views > 0
+  const views = version.snapshots.find((s) => s.takenAt === '24h')?.views ?? version.views
+  const hasStats = views > 0
   const color = versionColor(version.versionNumber)
 
   if (isWinner) {
@@ -27,7 +28,7 @@ export default function VersionChip({ version, groupStatus, onClick, active }: V
         <Crown size={11} className="text-[#ffd966] animate-crownTwinkle" fill="#ffd966" />
         <span>V{version.versionNumber}</span>
         <span className="text-[10px] font-medium text-white/90">
-          {hasStats ? formatNumber(version.views) : 'Winner'}
+          {hasStats ? formatNumber(views) : 'Winner'}
         </span>
         <span className="text-[9px] uppercase tracking-wide bg-white/20 rounded px-1 py-px">Published</span>
       </button>
@@ -44,7 +45,7 @@ export default function VersionChip({ version, groupStatus, onClick, active }: V
       >
         <Archive size={10} />
         <span>V{version.versionNumber}</span>
-        {hasStats && <span className="text-[10px] opacity-70">{formatNumber(version.views)}</span>}
+        {hasStats && <span className="text-[10px] opacity-70">{formatNumber(views)}</span>}
         <span className="text-[9px] uppercase tracking-wide opacity-70">Archived</span>
       </button>
     )
@@ -64,7 +65,7 @@ export default function VersionChip({ version, groupStatus, onClick, active }: V
     >
       <span>V{version.versionNumber}</span>
       {hasStats ? (
-        <span className="text-[10px] opacity-80">{formatNumber(version.views)}</span>
+        <span className="text-[10px] opacity-80">{formatNumber(views)}</span>
       ) : (
         <span className="text-[10px] opacity-40">—</span>
       )}

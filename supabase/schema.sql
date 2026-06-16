@@ -55,6 +55,12 @@ create table versions (
   completion_rate_pct numeric(5,2) default 0,
   team_comments text,
   thumbnail_url text,
+  -- Snapshot data: stats at 24h, 3d, and 7d after publish.
+  -- Flat stat columns above are kept for analytics compatibility.
+  snapshots jsonb default '[]'::jsonb,
+  -- Secondary platform cross-posting (date + notes for the first cross-post)
+  secondary_platform_date date,
+  secondary_platform_notes text default '',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

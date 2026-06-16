@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, AlertTriangle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { CustomTag, TagCategory } from '@/lib/types'
 import { toast } from 'sonner'
@@ -12,12 +12,20 @@ import { PRESET_TAGS, categoryLabel } from '@/components/trials/TagPicker'
 const TAG_CATEGORIES: TagCategory[] = ['test-type', 'audience', 'audio', 'hook-type', 'video-length', 'content-theme', 'format', 'custom']
 const PRESET_COLORS = ['#3B82F6', '#F97316', '#EC4899', '#14B8A6', '#EAB308', '#6B7280', '#A855D4', '#22C55E', '#EF4444']
 
+interface DeleteIntent {
+  tagName: string
+  isCustom: boolean
+  customTagId?: string
+  affectedGroupCount: number
+}
+
 export default function SettingsPage() {
   const [customTags, setCustomTags] = useState<CustomTag[]>([])
   const [loading, setLoading] = useState(true)
   const [newTag, setNewTag] = useState({ name: '', category: 'custom' as TagCategory, color: PRESET_COLORS[0] })
   const [adding, setAdding] = useState(false)
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [deleteIntent, setDeleteIntent] = useState<DeleteIntent | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const loadTags = async () => {
     const { data } = await supabase.from('custom_tags').select('*').order('created_at', { ascending: false })
@@ -52,12 +60,66 @@ export default function SettingsPage() {
     setAdding(false)
   }
 
-  const handleDeleteTag = async (id: string) => {
-    const { error } = await supabase.from('custom_tags').delete().eq('id', id)
-    if (error) { toast.error('Failed to delete tag'); return }
-    toast.success('Tag deleted')
-    setCustomTags((prev) => prev.filter((t) => t.id !== id))
-    setDeleteConfirm(null)
+  const countAffectedGroups = async (tagName: string): Promise<number> => {
+    const [{ data: groups }, { data: versions }] = await Promise.all([
+      supabase.from('trial_groups').select('id, tags'),
+      supabase.from('versions').select('trial_group_id, tags'),
+    ])
+    const groupIds = new Set<string>()
+    for (const g of groups ?? []) {
+      if ((g.tags as string[] | null)?.includes(tagName)) groupIds.add(g.id)
+    }
+    for (const v of versions ?? []) {
+      if ((v.tags as string[] | null)?.includes(tagName)) groupIds.add(v.trial_group_id)
+    }
+    return groupIds.size
+  }
+
+  const initiateDelete = async (tagName: string, isCustom: boolean, customTagId?: string) => {
+    const count = await countAffectedGroups(tagName)
+    setDeleteIntent({ tagName, isCustom, customTagId, affectedGroupCount: count })
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteIntent) return
+    setDeleting(true)
+
+    try {
+      // Strip tag from all trial_groups.tags
+      const { data: affectedGroups } = await supabase.from('trial_groups').select('id, tags')
+      for (const g of affectedGroups ?? []) {
+        if ((g.tags as string[] | null)?.includes(deleteIntent.tagName)) {
+          await supabase
+            .from('trial_groups')
+            .update({ tags: (g.tags as string[]).filter((t: string) => t !== deleteIntent.tagName) })
+            .eq('id', g.id)
+        }
+      }
+
+      // Strip tag from all versions.tags
+      const { data: affectedVersions } = await supabase.from('versions').select('id, tags')
+      for (const v of affectedVersions ?? []) {
+        if ((v.tags as string[] | null)?.includes(deleteIntent.tagName)) {
+          await supabase
+            .from('versions')
+            .update({ tags: (v.tags as string[]).filter((t: string) => t !== deleteIntent.tagName) })
+            .eq('id', v.id)
+        }
+      }
+
+      // Delete from custom_tags if it's a custom tag
+      if (deleteIntent.isCustom && deleteIntent.customTagId) {
+        await supabase.from('custom_tags').delete().eq('id', deleteIntent.customTagId)
+        setCustomTags((prev) => prev.filter((t) => t.id !== deleteIntent.customTagId))
+      }
+
+      toast.success(`'${deleteIntent.tagName}' removed`)
+      setDeleteIntent(null)
+    } catch {
+      toast.error('Failed to delete tag')
+    } finally {
+      setDeleting(false)
+    }
   }
 
   const groupedPresets = PRESET_TAGS.reduce<Record<string, typeof PRESET_TAGS>>((acc, tag) => {
@@ -75,6 +137,49 @@ export default function SettingsPage() {
         <h1 className="text-2xl font-bold text-[#45132c]">Settings</h1>
         <p className="text-[#8a5a70] text-sm mt-1">Manage custom tags and integrations</p>
       </div>
+
+      {/* Delete confirmation overlay */}
+      {deleteIntent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !deleting && setDeleteIntent(null)} />
+          <div className="relative bg-white border border-[#e8d5c4] rounded-2xl w-full max-w-sm p-6 shadow-[0_8px_32px_rgba(69,19,44,0.15)] animate-scaleIn">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center shrink-0">
+                <AlertTriangle size={18} className="text-red-500" />
+              </div>
+              <h3 className="text-base font-semibold text-[#45132c]">Delete tag?</h3>
+            </div>
+            <p className="text-sm text-[#5a2040] mb-5">
+              This will remove{' '}
+              <span className="font-semibold">'{deleteIntent.tagName}'</span>
+              {deleteIntent.affectedGroupCount > 0
+                ? ` from ${deleteIntent.affectedGroupCount} trial group${deleteIntent.affectedGroupCount === 1 ? '' : 's'}.`
+                : ' (not currently used by any trial groups).'}
+              {!deleteIntent.isCustom && (
+                <span className="block mt-1 text-[#a07080] text-xs">
+                  This is a built-in preset tag — it will only be removed from existing trial groups, not from the preset list.
+                </span>
+              )}
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setDeleteIntent(null)}
+                disabled={deleting}
+                className="px-4 py-2 text-sm text-[#8a5a70] hover:text-[#45132c] transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleting}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
+              >
+                {deleting ? 'Removing...' : 'Delete tag'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Custom Tags */}
       <section className={sectionClass}>
@@ -144,25 +249,19 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-1.5">
             {customTags.map((tag) => (
-              <div key={tag.id} className="flex items-center justify-between bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2">
+              <div key={tag.id} className="flex items-center justify-between bg-[#faf9f7] border border-[#e8d5c4] rounded-lg px-3 py-2 group">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: tag.color }} />
                   <span className="text-sm text-[#45132c]">{tag.name}</span>
                   <span className="text-xs text-[#a07080]">{categoryLabel(tag.category)}</span>
                 </div>
-                {deleteConfirm === tag.id ? (
-                  <div className="flex gap-2">
-                    <button onClick={() => handleDeleteTag(tag.id)} className="text-xs text-red-500 hover:text-red-700">Confirm</button>
-                    <button onClick={() => setDeleteConfirm(null)} className="text-xs text-[#a07080] hover:text-[#45132c]">Cancel</button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setDeleteConfirm(tag.id)}
-                    className="text-[#dcc8b0] hover:text-red-400 transition-colors"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                )}
+                <button
+                  onClick={() => initiateDelete(tag.name, true, tag.id)}
+                  title="Delete tag"
+                  className="text-[#dcc8b0] hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
             ))}
           </div>
@@ -172,7 +271,9 @@ export default function SettingsPage() {
       {/* Default Tag Presets */}
       <section className={sectionClass}>
         <h2 className="text-base font-semibold text-[#45132c] mb-1">Default Tag Presets</h2>
-        <p className="text-xs text-[#a07080] mb-4">Built-in tags available to all trial groups (read-only)</p>
+        <p className="text-xs text-[#a07080] mb-4">
+          Built-in tags available to all trial groups. Deleting a preset removes it from any groups currently using it.
+        </p>
         <div className="space-y-4">
           {Object.entries(groupedPresets).map(([category, tags]) => (
             <div key={category}>
@@ -181,13 +282,22 @@ export default function SettingsPage() {
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {tags.map((tag) => (
-                  <span
-                    key={tag.name}
-                    className="px-2 py-0.5 rounded-full text-xs font-medium"
-                    style={{ backgroundColor: tag.color + '22', color: tag.color, border: `1px solid ${tag.color}44` }}
-                  >
-                    {tag.name}
-                  </span>
+                  <div key={tag.name} className="group relative inline-flex items-center gap-1">
+                    <span
+                      className="px-2 py-0.5 rounded-full text-xs font-medium"
+                      style={{ backgroundColor: tag.color + '22', color: tag.color, border: `1px solid ${tag.color}44` }}
+                    >
+                      {tag.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => initiateDelete(tag.name, false)}
+                      title="Remove from all trial groups"
+                      className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white rounded-full text-[8px] items-center justify-center hidden group-hover:flex"
+                    >
+                      ×
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>

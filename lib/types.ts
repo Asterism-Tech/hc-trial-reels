@@ -1,9 +1,36 @@
 export type TrialStatus = 'live' | 'won' | 'archived'
 
+export type WorkflowStage =
+  | 'setup'
+  | 'awaiting_24h'
+  | 'winner_selection'
+  | 'awaiting_3d'
+  | 'awaiting_7d'
+  | 'complete'
+
+export type SnapshotPoint = '24h' | '3d' | '7d'
+
+export interface Snapshot {
+  takenAt: SnapshotPoint
+  capturedDate: string
+  views: number
+  accountsReached: number
+  likes: number
+  comments: number
+  shares: number
+  saves: number
+  profileVisits: number
+  followersGained: number
+  watchTimeSeconds: number
+  completionRatePct: number
+  successScore: number | null
+}
+
 export interface TrialGroup {
   id: string
   name: string
   status: TrialStatus
+  workflowStage: WorkflowStage
   testType: string
   contentTheme: string[]
   uploadDate: string
@@ -26,8 +53,12 @@ export interface Version {
   isPublished: boolean
   /** Primary platform — always Instagram for Hobbycraft trials */
   platform: string[]
-  /** Where this version was also published, if anywhere (e.g. TikTok, Facebook) */
+  /** Where this version was also published, if anywhere (e.g. TikTok) */
   secondaryPlatform: string[]
+  secondaryPlatformDate: string | null
+  secondaryPlatformNotes: string
+  /** Stats at 24h, 3d, and 7d snapshot points */
+  snapshots: Snapshot[]
   differences: string
   hookType: string
   hookText: string
@@ -41,6 +72,7 @@ export interface Version {
   targetAgeGroup: string
   /** Version tags — used to compare versions against each other */
   tags: string[]
+  /** Convenience fields — mirror the 24h snapshot for backwards compat */
   views: number
   accountsReached: number
   likes: number

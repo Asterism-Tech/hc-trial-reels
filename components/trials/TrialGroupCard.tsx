@@ -1,20 +1,24 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import { ChevronDown, ChevronUp, Crown, Pencil, Trash2, Archive } from 'lucide-react'
-import { TrialGroup, Version } from '@/lib/types'
+import { ChevronDown, ChevronUp, Crown, Pencil, Trash2, Archive, Plus, X } from 'lucide-react'
+import { TrialGroup, Version, Snapshot, WorkflowStage } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import Badge, { statusBadgeVariant } from '@/components/ui/Badge'
 import VersionChip from './VersionChip'
 import VersionComparisonTable from './VersionComparisonTable'
 import StatBar from './StatBar'
+import SnapshotTabs from './SnapshotTabs'
 import EditTrialGroupModal from './EditTrialGroupModal'
 import EditVersionModal from './EditVersionModal'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import { formatDate, isSafeImageUrl } from '@/lib/utils'
 import { versionColor, WINNER_COLOR } from '@/lib/version-colors'
-import { successScore, scoreColor } from '@/lib/scoring'
+import { calculateGroupScores, scoreColor } from '@/lib/scoring'
+import { computeWorkflowStage } from '@/lib/data'
+
+const SECONDARY_PLATFORMS = ['TikTok', 'Facebook', 'YouTube Shorts']
 
 interface TrialGroupCardProps {
   group: TrialGroup
@@ -23,104 +27,73 @@ interface TrialGroupCardProps {
   defaultExpanded?: boolean
 }
 
-const STAT_FIELDS: { key: keyof Version; label: string; type: 'number' | 'pct' | 'text' | 'bool' | 'array' }[] = [
-  { key: 'views', label: 'Views', type: 'number' },
-  { key: 'accountsReached', label: 'Accounts Reached', type: 'number' },
-  { key: 'likes', label: 'Likes', type: 'number' },
-  { key: 'comments', label: 'Comments', type: 'number' },
-  { key: 'shares', label: 'Shares', type: 'number' },
-  { key: 'saves', label: 'Saves', type: 'number' },
-  { key: 'profileVisits', label: 'Profile Visits', type: 'number' },
-  { key: 'followersGained', label: 'Followers Gained', type: 'number' },
-  { key: 'watchTimeSeconds', label: 'Watch Time (s)', type: 'number' },
-  { key: 'completionRatePct', label: 'Completion Rate (%)', type: 'pct' },
-]
-
-function camelToSnake(s: string) {
-  return s.replace(/([A-Z])/g, '_$1').toLowerCase()
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr)
+  d.setDate(d.getDate() + days)
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
 
-function InlineStatEdit({
-  version,
-  field,
-  label,
-  onSave,
-}: {
-  version: Version
-  field: keyof Version
-  label: string
-  onSave: (versionId: string, field: string, value: number) => void
-}) {
-  const [editing, setEditing] = useState(false)
-  const [localVal, setLocalVal] = useState(String(version[field] ?? 0))
-
-  const handleChange = (val: string) => {
-    setLocalVal(val)
-    onSave(version.id, camelToSnake(field as string), parseFloat(val) || 0)
-  }
-
-  if (editing) {
-    return (
-      <input
-        type="number"
-        autoFocus
-        value={localVal}
-        onChange={(e) => handleChange(e.target.value)}
-        onBlur={() => setEditing(false)}
-        className="w-20 bg-[#faf9f7] border border-[#45132c] rounded px-1.5 py-0.5 text-xs text-[#45132c] focus:outline-none"
-        step={field === 'completionRatePct' ? '0.01' : '1'}
-      />
-    )
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={() => setEditing(true)}
-      className="text-xs text-[#45132c] hover:text-[#ed4a7e] transition-colors cursor-pointer font-mono"
-      title="Click to edit"
-    >
-      {String(version[field] ?? '—')}
-    </button>
-  )
+function is24hWindowPassed(publishDate: string): boolean {
+  if (!publishDate) return false
+  const pub = new Date(publishDate)
+  const now = new Date()
+  const diffMs = now.getTime() - pub.getTime()
+  return diffMs >= 24 * 60 * 60 * 1000
 }
 
 export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpanded = false }: TrialGroupCardProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const [versions, setVersions] = useState<Version[]>(group.versions)
+  const [workflowStage, setWorkflowStage] = useState<WorkflowStage>(group.workflowStage)
   const [editingGroup, setEditingGroup] = useState(false)
   const [deletingGroup, setDeletingGroup] = useState(false)
   const [editingVersion, setEditingVersion] = useState<Version | null>(null)
   const [deletingVersion, setDeletingVersion] = useState<Version | null>(null)
+  const [editingSecondaryPlatform, setEditingSecondaryPlatform] = useState<Set<string>>(new Set())
+  const [secondaryPlatformDraft, setSecondaryPlatformDraft] = useState<Record<string, { platform: string; date: string }>>({})
   const [busy, setBusy] = useState(false)
   const debounceRefs = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
-  const handleStatSave = useCallback((versionId: string, snakeField: string, value: number) => {
-    setVersions((prev) =>
-      prev.map((v) => {
+  const updateVersions = (next: Version[]) => {
+    const newStage = computeWorkflowStage(group.publishDate || null, next)
+    setVersions(next)
+    setWorkflowStage(newStage)
+    onUpdate({ ...group, workflowStage: newStage, versions: next })
+  }
+
+  const handleSnapshotsUpdated = useCallback((versionId: string, snapshots: Snapshot[]) => {
+    setVersions((prev) => {
+      const next = prev.map((v) => {
         if (v.id !== versionId) return v
-        const camelField = snakeField.replace(/_([a-z])/g, (_, l) => l.toUpperCase()) as keyof Version
-        return { ...v, [camelField]: value }
+        const snap24h = snapshots.find((s) => s.takenAt === '24h')
+        return {
+          ...v,
+          snapshots,
+          ...(snap24h
+            ? {
+                views: snap24h.views,
+                accountsReached: snap24h.accountsReached,
+                likes: snap24h.likes,
+                comments: snap24h.comments,
+                shares: snap24h.shares,
+                saves: snap24h.saves,
+                profileVisits: snap24h.profileVisits,
+                followersGained: snap24h.followersGained,
+                watchTimeSeconds: snap24h.watchTimeSeconds,
+                completionRatePct: snap24h.completionRatePct,
+              }
+            : {}),
+        }
       })
-    )
+      const newStage = computeWorkflowStage(group.publishDate || null, next)
+      setWorkflowStage(newStage)
+      onUpdate({ ...group, workflowStage: newStage, versions: next })
+      return next
+    })
+  }, [group, onUpdate])
 
-    const key = `${versionId}:${snakeField}`
-    if (debounceRefs.current[key]) clearTimeout(debounceRefs.current[key])
-    debounceRefs.current[key] = setTimeout(async () => {
-      const { error } = await supabase
-        .from('versions')
-        .update({ [snakeField]: value, updated_at: new Date().toISOString() })
-        .eq('id', versionId)
-      if (error) toast.error(`Failed to save ${snakeField}`)
-    }, 800)
-  }, [])
-
-  // Winner = published reel. One action: the winner is published (publish date
-  // set today if missing) and every other version is archived with the group
-  // marked as won.
   const handleMarkWinner = async (versionId: string) => {
     const publishDate = group.publishDate || new Date().toISOString().slice(0, 10)
-
     for (const v of versions) {
       await supabase
         .from('versions')
@@ -132,13 +105,15 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
       .update({ status: 'won', publish_date: publishDate, updated_at: new Date().toISOString() })
       .eq('id', group.id)
 
-    const updatedVersions = versions.map((v) => ({
+    const next = versions.map((v) => ({
       ...v,
       isWinner: v.id === versionId,
       isPublished: v.id === versionId,
     }))
-    setVersions(updatedVersions)
-    onUpdate({ ...group, status: 'won', publishDate, versions: updatedVersions })
+    setVersions(next)
+    const newStage = computeWorkflowStage(publishDate, next)
+    setWorkflowStage(newStage)
+    onUpdate({ ...group, status: 'won', publishDate, workflowStage: newStage, versions: next })
     toast.success('Winner published — other versions archived 👑')
   }
 
@@ -164,7 +139,6 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
       .update({ total_versions: remaining.length })
       .eq('trial_group_id', group.id)
 
-    // If the published winner was deleted, the trial goes back to live
     let status = group.status
     let publishDate = group.publishDate
     if (deletingVersion.isWinner && group.status === 'won') {
@@ -180,7 +154,9 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
     const updated = remaining.map((v) => ({ ...v, totalVersions: remaining.length }))
     setVersions(updated)
     setDeletingVersion(null)
-    onUpdate({ ...group, status, publishDate, versions: updated })
+    const newStage = computeWorkflowStage(publishDate || null, updated)
+    setWorkflowStage(newStage)
+    onUpdate({ ...group, status, publishDate, workflowStage: newStage, versions: updated })
     toast.success(`V${deletingVersion.versionNumber} deleted`)
   }
 
@@ -197,9 +173,55 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
     debounceRefs.current[key] = setTimeout(async () => {
       const { error } = await supabase.from('versions').update({ team_comments: comment }).eq('id', versionId)
       if (error) toast.error('Failed to save comment')
-      else toast.success('Comment saved')
     }, 800)
   }, [])
+
+  const handleSaveSecondaryPlatform = async (versionId: string) => {
+    const draft = secondaryPlatformDraft[versionId]
+    if (!draft?.platform) { toast.error('Choose a platform'); return }
+
+    const { error } = await supabase
+      .from('versions')
+      .update({
+        secondary_platform: [draft.platform],
+        secondary_platform_date: draft.date || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', versionId)
+
+    if (error) { toast.error('Failed to save'); return }
+
+    const next = versions.map((v) =>
+      v.id === versionId
+        ? { ...v, secondaryPlatform: [draft.platform], secondaryPlatformDate: draft.date || null }
+        : v
+    )
+    setVersions(next)
+    setEditingSecondaryPlatform((prev) => { const s = new Set(prev); s.delete(versionId); return s })
+    toast.success('Cross-post recorded')
+    onUpdate({ ...group, versions: next })
+  }
+
+  // Relative success scores at 24h for all versions
+  const score24hItems = versions.map((v) => ({
+    snap: v.snapshots.find((s) => s.takenAt === '24h') ?? {
+      takenAt: '24h' as const,
+      capturedDate: '', views: v.views, accountsReached: v.accountsReached,
+      likes: v.likes, comments: v.comments, shares: v.shares, saves: v.saves,
+      profileVisits: v.profileVisits, followersGained: v.followersGained,
+      watchTimeSeconds: v.watchTimeSeconds, completionRatePct: v.completionRatePct,
+      successScore: null,
+    },
+    videoLengthSeconds: v.videoLengthSeconds,
+  }))
+  const score24hValues = calculateGroupScores(score24hItems)
+  const scoreByVersionId = Object.fromEntries(versions.map((v, i) => [v.id, score24hValues[i]]))
+
+  const hasAny24hData = versions.some((v) => v.views > 0 || v.snapshots.some((s) => s.takenAt === '24h' && s.views > 0))
+  const showWorkflowBanner =
+    workflowStage === 'awaiting_24h' &&
+    group.publishDate &&
+    is24hWindowPassed(group.publishDate)
 
   return (
     <div className={`bg-white border border-[#e8d5c4] rounded-xl overflow-hidden animate-fadeIn shadow-[0_2px_8px_rgba(69,19,44,0.06)] transition-all duration-200 ${expanded ? 'shadow-[0_8px_24px_rgba(69,19,44,0.12)]' : 'hover-lift'}`}>
@@ -216,6 +238,17 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
             </Badge>
             {group.testType && (
               <span className="text-xs px-2 py-0.5 bg-[#f0e6d3] text-[#8a5a70] rounded-full">{group.testType}</span>
+            )}
+            {/* Snapshot reminder pills */}
+            {workflowStage === 'awaiting_3d' && group.publishDate && (
+              <span className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-full">
+                3-day snapshot due {addDays(group.publishDate, 3)}
+              </span>
+            )}
+            {workflowStage === 'awaiting_7d' && group.publishDate && (
+              <span className="text-[10px] px-2 py-0.5 bg-[#faf9f7] text-[#a07080] border border-[#e8d5c4] rounded-full">
+                7-day snapshot due {addDays(group.publishDate, 7)} <span className="opacity-60">· nice to have</span>
+              </span>
             )}
           </div>
           {group.contentTheme.length > 0 && (
@@ -258,6 +291,25 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
         </div>
       </div>
 
+      {/* 24h data-due banner */}
+      {showWorkflowBanner && (
+        <div className="border-t border-amber-200 bg-amber-50 px-4 py-2.5 flex items-center gap-2">
+          <span className="text-sm">⏱</span>
+          <p className="text-xs text-amber-800 font-medium">
+            Ready for 24h data — enter stats below and choose your winner.
+          </p>
+          {!expanded && (
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              className="ml-auto text-xs text-amber-700 underline underline-offset-2 hover:text-amber-900"
+            >
+              Open
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Expanded */}
       {expanded && (
         <div className="border-t border-[#e8d5c4] p-4 space-y-6 animate-slideUp">
@@ -267,10 +319,16 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
             <VersionComparisonTable versions={versions} />
           </div>
 
+          {/* Snapshot tabs — main stat input */}
+          <div>
+            <h4 className="text-xs font-semibold text-[#8a5a70] uppercase tracking-wider mb-3">Snapshot Data</h4>
+            <SnapshotTabs versions={versions} onSnapshotsUpdated={handleSnapshotsUpdated} />
+          </div>
+
           {/* Stat bars */}
-          {versions.some((v) => v.views > 0) && (
+          {hasAny24hData && (
             <div className="animate-slideUp stagger-2">
-              <h4 className="text-xs font-semibold text-[#8a5a70] uppercase tracking-wider mb-3">Performance</h4>
+              <h4 className="text-xs font-semibold text-[#8a5a70] uppercase tracking-wider mb-3">24h Performance</h4>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatBar versions={versions} stat="views" label="Views" />
                 <StatBar versions={versions} stat="completionRatePct" label="Completion %" unit="%" />
@@ -285,11 +343,16 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
             {versions.map((v, vIdx) => {
               const color = versionColor(v.versionNumber)
               const isArchived = !v.isWinner && (group.status === 'won' || group.status === 'archived')
-              const score = successScore(v)
+              const score = scoreByVersionId[v.id]
+              const has24hData = v.views > 0 || v.snapshots.some((s) => s.takenAt === '24h' && s.views > 0)
+              const hasSecondaryPlatform = v.secondaryPlatform.length > 0
+              const isEditingPlatform = editingSecondaryPlatform.has(v.id)
+              const canDelete = versions.length > 2
+
               return (
                 <div
                   key={v.id}
-                  className={`rounded-xl p-4 border-2 animate-slideUp stagger-${Math.min(vIdx + 2, 8)} transition-transform duration-200 hover:-translate-y-0.5`}
+                  className={`group/panel rounded-xl p-4 border-2 animate-slideUp stagger-${Math.min(vIdx + 2, 8)} transition-transform duration-200 hover:-translate-y-0.5`}
                   style={v.isWinner
                     ? { borderColor: WINNER_COLOR, backgroundColor: '#fdf2f6', boxShadow: '0 2px 12px rgba(237,74,126,0.15)' }
                     : { borderColor: isArchived ? '#e0d8dc' : color + '55', backgroundColor: isArchived ? '#f7f4f5' : '#faf9f7' }}
@@ -335,40 +398,112 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
                       >
                         <Pencil size={11} />
                       </button>
-                      {versions.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => setDeletingVersion(v)}
-                          title="Delete version"
-                          className="p-1.5 text-[#b09090] hover:text-red-500 bg-white border border-[#e8d5c4] rounded-lg transition-all"
-                        >
-                          <Trash2 size={11} />
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => canDelete && setDeletingVersion(v)}
+                        title={canDelete ? 'Delete version' : 'Cannot delete — minimum 2 versions required'}
+                        className={`p-1.5 bg-white border border-[#e8d5c4] rounded-lg transition-all ${
+                          canDelete
+                            ? 'text-[#b09090] hover:text-red-500 opacity-0 group-hover/panel:opacity-100 hover:opacity-100'
+                            : 'text-[#dcc8b0] cursor-not-allowed opacity-30'
+                        }`}
+                      >
+                        <Trash2 size={11} />
+                      </button>
                     </div>
                   </div>
 
-                  {/* Success score + secondary platforms */}
-                  {(score !== null || v.secondaryPlatform.length > 0) && (
+                  {/* Success score + secondary platform badges */}
+                  {(score !== null || hasSecondaryPlatform) && (
                     <div className="flex items-center flex-wrap gap-1.5 mb-3">
                       {score !== null && (
                         <span
                           className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
                           style={{ backgroundColor: scoreColor(score) + '1f', color: scoreColor(score) }}
-                          title="Success score (0–100) — weighted across completion, engagement, saves, shares, follows and watch time"
+                          title="Success score (0–100) — relative to other versions at the 24h snapshot"
                         >
                           Score {score}
                         </span>
                       )}
-                      {v.secondaryPlatform.map((p) => (
+                      {hasSecondaryPlatform && v.secondaryPlatform.map((p) => (
                         <span
                           key={p}
                           className="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-[#ed4a7e]/10 text-[#c02860]"
-                          title="Also published here"
+                          title={v.secondaryPlatformDate ? `Cross-posted on ${v.secondaryPlatformDate}` : undefined}
                         >
-                          + {p}
+                          Also on {p}{v.secondaryPlatformDate ? ` — ${formatDate(v.secondaryPlatformDate)}` : ''}
                         </span>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Secondary platform prompt — only after 24h data is in */}
+                  {has24hData && !hasSecondaryPlatform && (
+                    <div className="mb-3">
+                      {!isEditingPlatform ? (
+                        <div className="flex items-center gap-2 text-[10px] text-[#a07080] bg-[#f5eee4] rounded-lg px-2.5 py-1.5">
+                          <span>Did this version go anywhere else?</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingSecondaryPlatform((prev) => new Set([...prev, v.id]))
+                              setSecondaryPlatformDraft((prev) => ({ ...prev, [v.id]: { platform: '', date: '' } }))
+                            }}
+                            className="ml-auto flex items-center gap-0.5 text-[#ed4a7e] hover:text-[#c02860] font-semibold transition-colors"
+                          >
+                            <Plus size={10} /> Add platform
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="bg-[#faf9f7] border border-[#e8d5c4] rounded-lg p-2.5 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={secondaryPlatformDraft[v.id]?.platform ?? ''}
+                              onChange={(e) =>
+                                setSecondaryPlatformDraft((prev) => ({
+                                  ...prev,
+                                  [v.id]: { ...prev[v.id], platform: e.target.value },
+                                }))
+                              }
+                              className="flex-1 bg-white border border-[#e8d5c4] rounded-md px-2 py-1 text-xs text-[#45132c] focus:outline-none focus:border-[#45132c]"
+                            >
+                              <option value="">Select platform...</option>
+                              {SECONDARY_PLATFORMS.map((p) => (
+                                <option key={p} value={p}>{p}</option>
+                              ))}
+                            </select>
+                            <input
+                              type="date"
+                              value={secondaryPlatformDraft[v.id]?.date ?? ''}
+                              onChange={(e) =>
+                                setSecondaryPlatformDraft((prev) => ({
+                                  ...prev,
+                                  [v.id]: { ...prev[v.id], date: e.target.value },
+                                }))
+                              }
+                              className="bg-white border border-[#e8d5c4] rounded-md px-2 py-1 text-xs text-[#45132c] focus:outline-none focus:border-[#45132c] [color-scheme:light]"
+                            />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleSaveSecondaryPlatform(v.id)}
+                              className="px-2.5 py-1 bg-[#45132c] hover:bg-[#ed4a7e] text-white text-xs rounded-md transition-colors"
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingSecondaryPlatform((prev) => { const s = new Set(prev); s.delete(v.id); return s })
+                              }}
+                              className="p-1 text-[#a07080] hover:text-[#45132c] transition-colors"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -395,21 +530,6 @@ export default function TrialGroupCard({ group, onUpdate, onDelete, defaultExpan
                       className="w-full h-24 object-cover rounded-lg mb-3"
                     />
                   )}
-
-                  {/* Stats grid — editable */}
-                  <div className="space-y-1.5 mb-3">
-                    {STAT_FIELDS.map((sf) => (
-                      <div key={sf.key} className="flex items-center justify-between">
-                        <span className="text-[10px] text-[#a07080]">{sf.label}</span>
-                        <InlineStatEdit
-                          version={v}
-                          field={sf.key}
-                          label={sf.label}
-                          onSave={handleStatSave}
-                        />
-                      </div>
-                    ))}
-                  </div>
 
                   {/* Team comments */}
                   <div>

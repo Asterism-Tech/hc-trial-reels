@@ -6,7 +6,7 @@ export async function seedDatabase(supabase: SupabaseClient) {
     return { message: 'Database already seeded', skipped: true }
   }
 
-  // Trial Group 1: Upcycled Mirror Ball Letter
+  // Trial Group 1: Upcycled Mirror Ball Letter — complete trial with all 3 snapshot points
   const { data: tg1, error: tg1Error } = await supabase
     .from('trial_groups')
     .insert({
@@ -43,6 +43,7 @@ export async function seedDatabase(supabase: SupabaseClient) {
       caption: '',
       cta_used: ['Caption', 'In video'],
       target_age_group: '18-24',
+      // Flat columns kept for analytics query compatibility
       views: 219,
       accounts_reached: 208,
       likes: 8,
@@ -55,6 +56,26 @@ export async function seedDatabase(supabase: SupabaseClient) {
       completion_rate_pct: 1.0,
       team_comments: 'Hook was not specific or personable enough',
       thumbnail_url: '',
+      snapshots: [
+        {
+          takenAt: '24h', capturedDate: '2025-06-08',
+          views: 219, accountsReached: 208, likes: 8, comments: 0,
+          shares: 1, saves: 0, profileVisits: 1, followersGained: 0,
+          watchTimeSeconds: 3, completionRatePct: 1.0, successScore: null,
+        },
+        {
+          takenAt: '3d', capturedDate: '2025-06-10',
+          views: 261, accountsReached: 244, likes: 9, comments: 0,
+          shares: 1, saves: 0, profileVisits: 1, followersGained: 0,
+          watchTimeSeconds: 3, completionRatePct: 1.0, successScore: null,
+        },
+        {
+          takenAt: '7d', capturedDate: '2025-06-14',
+          views: 298, accountsReached: 278, likes: 10, comments: 0,
+          shares: 1, saves: 0, profileVisits: 2, followersGained: 0,
+          watchTimeSeconds: 3, completionRatePct: 1.1, successScore: null,
+        },
+      ],
     },
     {
       trial_group_id: tg1.id,
@@ -86,6 +107,26 @@ export async function seedDatabase(supabase: SupabaseClient) {
       completion_rate_pct: 6.0,
       team_comments: '',
       thumbnail_url: '',
+      snapshots: [
+        {
+          takenAt: '24h', capturedDate: '2025-06-08',
+          views: 1536, accountsReached: 1349, likes: 75, comments: 0,
+          shares: 5, saves: 17, profileVisits: 2, followersGained: 1,
+          watchTimeSeconds: 11, completionRatePct: 6.0, successScore: null,
+        },
+        {
+          takenAt: '3d', capturedDate: '2025-06-10',
+          views: 2148, accountsReached: 1890, likes: 102, comments: 2,
+          shares: 8, saves: 23, profileVisits: 4, followersGained: 2,
+          watchTimeSeconds: 11, completionRatePct: 7.2, successScore: null,
+        },
+        {
+          takenAt: '7d', capturedDate: '2025-06-14',
+          views: 2891, accountsReached: 2540, likes: 134, comments: 3,
+          shares: 11, saves: 30, profileVisits: 6, followersGained: 3,
+          watchTimeSeconds: 11, completionRatePct: 7.8, successScore: null,
+        },
+      ],
     },
     {
       trial_group_id: tg1.id,
@@ -118,10 +159,30 @@ export async function seedDatabase(supabase: SupabaseClient) {
       completion_rate_pct: 10.0,
       team_comments: '',
       thumbnail_url: '',
+      snapshots: [
+        {
+          takenAt: '24h', capturedDate: '2025-06-08',
+          views: 1414, accountsReached: 1177, likes: 58, comments: 0,
+          shares: 5, saves: 13, profileVisits: 0, followersGained: 3,
+          watchTimeSeconds: 14, completionRatePct: 10.0, successScore: null,
+        },
+        {
+          takenAt: '3d', capturedDate: '2025-06-10',
+          views: 1820, accountsReached: 1512, likes: 74, comments: 1,
+          shares: 7, saves: 17, profileVisits: 2, followersGained: 4,
+          watchTimeSeconds: 14, completionRatePct: 10.4, successScore: null,
+        },
+        {
+          takenAt: '7d', capturedDate: '2025-06-14',
+          views: 2210, accountsReached: 1834, likes: 88, comments: 1,
+          shares: 9, saves: 20, profileVisits: 3, followersGained: 5,
+          watchTimeSeconds: 14, completionRatePct: 10.7, successScore: null,
+        },
+      ],
     },
   ])
 
-  // Trial Group 2: Harry Styles - Tie Outfit
+  // Trial Group 2: Harry Styles - Tie Outfit — live, awaiting 24h data
   const { data: tg2, error: tg2Error } = await supabase
     .from('trial_groups')
     .insert({
@@ -158,18 +219,11 @@ export async function seedDatabase(supabase: SupabaseClient) {
       caption: '',
       cta_used: [],
       target_age_group: '',
-      views: 0,
-      accounts_reached: 0,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      saves: 0,
-      profile_visits: 0,
-      followers_gained: 0,
-      watch_time_seconds: 0,
-      completion_rate_pct: 0,
-      team_comments: '',
-      thumbnail_url: '',
+      views: 0, accounts_reached: 0, likes: 0, comments: 0, shares: 0,
+      saves: 0, profile_visits: 0, followers_gained: 0,
+      watch_time_seconds: 0, completion_rate_pct: 0,
+      team_comments: '', thumbnail_url: '',
+      snapshots: [],
     },
     {
       trial_group_id: tg2.id,
@@ -189,18 +243,11 @@ export async function seedDatabase(supabase: SupabaseClient) {
       caption: '',
       cta_used: [],
       target_age_group: '',
-      views: 0,
-      accounts_reached: 0,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      saves: 0,
-      profile_visits: 0,
-      followers_gained: 0,
-      watch_time_seconds: 0,
-      completion_rate_pct: 0,
-      team_comments: '',
-      thumbnail_url: '',
+      views: 0, accounts_reached: 0, likes: 0, comments: 0, shares: 0,
+      saves: 0, profile_visits: 0, followers_gained: 0,
+      watch_time_seconds: 0, completion_rate_pct: 0,
+      team_comments: '', thumbnail_url: '',
+      snapshots: [],
     },
     {
       trial_group_id: tg2.id,
@@ -220,18 +267,11 @@ export async function seedDatabase(supabase: SupabaseClient) {
       caption: '',
       cta_used: [],
       target_age_group: '',
-      views: 0,
-      accounts_reached: 0,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      saves: 0,
-      profile_visits: 0,
-      followers_gained: 0,
-      watch_time_seconds: 0,
-      completion_rate_pct: 0,
-      team_comments: '',
-      thumbnail_url: '',
+      views: 0, accounts_reached: 0, likes: 0, comments: 0, shares: 0,
+      saves: 0, profile_visits: 0, followers_gained: 0,
+      watch_time_seconds: 0, completion_rate_pct: 0,
+      team_comments: '', thumbnail_url: '',
+      snapshots: [],
     },
   ])
 

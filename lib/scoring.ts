@@ -1,39 +1,81 @@
-import { Version } from './types'
+import { Version, Snapshot } from './types'
 
-// Success score — a single 0–100 number summarising how well a version
-// performed, so winners are easier to spot at a glance and to compare across
-// trials. Per the brief, watch-through (completion) is valued most highly,
-// followed by the engagement signals that drive reach (saves, shares), then
-// the conversion signals (followers, profile visits).
-//
-// Each metric is turned into a *rate* (relative to views/reach) so a version
-// with 2k views isn't unfairly beaten by one with 200k. Each rate is then
-// capped at a "great" benchmark = full marks for that component.
+// ── Relative group scoring ────────────────────────────────────────────────────
+// Success score is calculated relative to sibling versions at the same snapshot
+// point, so a version with 200 views isn't unfairly beaten by one with 200k.
+// Weights per the brief: completion 35%, watch-time 25%, saves 20%, shares 10%,
+// likes 10%.
+
+export interface SnapshotForScoring {
+  snap: Snapshot
+  videoLengthSeconds: number
+}
+
+function watchTimeNorm(snap: Snapshot, videoLengthSeconds: number): number {
+  if (videoLengthSeconds > 0) return Math.min(snap.watchTimeSeconds / videoLengthSeconds, 1)
+  return Math.min(snap.watchTimeSeconds / 30, 1) // 30s full-watch fallback
+}
+
+/**
+ * Calculate relative 0–100 success scores for a group of snapshots at the same
+ * time point. Returns null for any entry that has no data (views === 0).
+ */
+export function calculateGroupScores(items: SnapshotForScoring[]): (number | null)[] {
+  const hasData = items.map(({ snap }) => snap.views > 0)
+  if (!hasData.some(Boolean)) return items.map(() => null)
+
+  const active = items.filter((_, i) => hasData[i])
+
+  const maxCompletion = Math.max(...active.map(({ snap }) => snap.completionRatePct))
+  const maxWatch = Math.max(...active.map(({ snap, videoLengthSeconds }) => watchTimeNorm(snap, videoLengthSeconds)))
+  const maxSaves = Math.max(...active.map(({ snap }) => snap.saves))
+  const maxShares = Math.max(...active.map(({ snap }) => snap.shares))
+  const maxLikes = Math.max(...active.map(({ snap }) => snap.likes))
+
+  const norm = (val: number, max: number) => (max > 0 ? Math.min(val / max, 1) : 0)
+
+  return items.map(({ snap, videoLengthSeconds }, i) => {
+    if (!hasData[i]) return null
+    const score =
+      0.35 * norm(snap.completionRatePct, maxCompletion) +
+      0.25 * norm(watchTimeNorm(snap, videoLengthSeconds), maxWatch) +
+      0.20 * norm(snap.saves, maxSaves) +
+      0.10 * norm(snap.shares, maxShares) +
+      0.10 * norm(snap.likes, maxLikes)
+    return Math.round(score * 100)
+  })
+}
+
+/** Colour band for a score badge — green ≥ 70, amber 40–69, red < 40. */
+export function scoreColor(score: number): string {
+  if (score >= 70) return '#16A34A'
+  if (score >= 40) return '#F59E0B'
+  return '#EF4444'
+}
+
+// ── Legacy single-version absolute scoring ───────────────────────────────────
+// Used where the full peer group isn't available (export, VersionComparisonTable
+// fallback). New code should prefer calculateGroupScores.
 
 export interface ScoreWeight {
   label: string
   weight: number
 }
 
-// Benchmarks for "full marks" on each rate, and the weight each carries.
 const COMPONENTS = {
-  completion: { weight: 0.30, benchmark: 1 }, // completion rate (0–1)
-  engagement: { weight: 0.20, benchmark: 0.1 }, // (likes+comments+shares+saves)/views
-  saves: { weight: 0.15, benchmark: 0.03 }, // saves/views
-  shares: { weight: 0.1, benchmark: 0.02 }, // shares/views
-  followers: { weight: 0.1, benchmark: 0.02 }, // followersGained/accountsReached
-  profileVisits: { weight: 0.1, benchmark: 0.05 }, // profileVisits/views
-  watch: { weight: 0.05, benchmark: 1 }, // watchTime / videoLength (full watch)
+  completion: { weight: 0.30, benchmark: 1 },
+  engagement: { weight: 0.20, benchmark: 0.1 },
+  saves: { weight: 0.15, benchmark: 0.03 },
+  shares: { weight: 0.1, benchmark: 0.02 },
+  followers: { weight: 0.1, benchmark: 0.02 },
+  profileVisits: { weight: 0.1, benchmark: 0.05 },
+  watch: { weight: 0.05, benchmark: 1 },
 } as const
 
 const safeRate = (num: number, den: number) => (den > 0 ? num / den : 0)
 const capped = (rate: number, benchmark: number) =>
   benchmark > 0 ? Math.min(rate / benchmark, 1) : 0
 
-/**
- * Returns a 0–100 success score, or null if the version has no data yet
- * (no point scoring a reel whose numbers haven't been entered).
- */
 export function successScore(v: Version): number | null {
   if (!v.views || v.views === 0) return null
 
@@ -59,14 +101,6 @@ export function successScore(v: Version): number | null {
   return Math.round(score * 100)
 }
 
-/** Colour band for a score badge — green = strong, amber = mid, grey = weak. */
-export function scoreColor(score: number): string {
-  if (score >= 70) return '#16A34A' // green — strong
-  if (score >= 45) return '#F59E0B' // amber — middling
-  return '#9b8a92' // muted — weak
-}
-
-/** The version with the highest success score, if any have data. */
 export function topScoringVersion(versions: Version[]): Version | null {
   let best: Version | null = null
   let bestScore = -1
